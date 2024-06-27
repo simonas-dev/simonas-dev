@@ -12,7 +12,7 @@ author: You
 A quick and dirty solution to sending numeric data to 
 ESP32 using Android app via Bluetooth.
 
-[Download Android App APK](ballistic-wizard-1.0.0.apk)
+[Download Android App APK](/ballistic-wizard-1.0.0.apk)
 
 [Andorid App Source Code](https://github.com/simonas-dev/ballistic-wizard)
 
