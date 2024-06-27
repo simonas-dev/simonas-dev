@@ -5,7 +5,7 @@ tag: android esp32 bluetooth
 author: You
 ---
 
-![baller wizard using the app](pictures/baller-wizard.jpg)
+![baller wizard using the app](images/baller-wizard.jpg)
 
 # Ballistic Wizard
 
