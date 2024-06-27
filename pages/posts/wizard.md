@@ -1,7 +1,7 @@
 ---
 title: Ballistic Wizard
 date: 2024/6/27
-tag: android esp32 bluetooth
+tag: android, esp32, bluetooth
 author: You
 ---
 
