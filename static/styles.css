@@ -596,6 +596,73 @@ body:has(.video-page) .chrome:has(details[open]) {
   opacity: 1;
 }
 
+/* Digital Sun, faint in the home sky: the whole layer is 5% opaque above the
+   sea line and fully transparent below it. Same box as #ocean (fixed, inset 0),
+   so the shader horizon is a fixed fraction of this box too: 38.2% from the
+   bottom (CAMERA_PITCH in ocean.frag.glsl; change both together). A short
+   feather above the line keeps the cut from reading as an edge. */
+.sky-video {
+  --sky-video-opacity: 0.05;
+  --sky-horizon: 38.2%;
+  --sky-video-feather: 2%;
+  --video-shift: 3%;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: var(--sky-video-opacity);
+  -webkit-mask-image: linear-gradient(to top,
+    transparent var(--sky-horizon),
+    #000 calc(var(--sky-horizon) + var(--sky-video-feather)));
+  mask-image: linear-gradient(to top,
+    transparent var(--sky-horizon),
+    #000 calc(var(--sky-horizon) + var(--sky-video-feather)));
+}
+
+/* Matches the portrait encodes' breakpoint in index.html. */
+@media (orientation: portrait) {
+  .sky-video {
+    --video-shift: -1.5%;
+  }
+}
+
+/* Opacity-only swap fade: a transformed ancestor would break position: fixed. */
+.page.htmx-swapping #main > .sky-video,
+.page.htmx-added #main > .sky-video {
+  transform: none;
+}
+
+/* Frame centre is shifted by --video-shift (positive = right, negative =
+   left) to centre the lamp, and widened by twice |shift| so it still covers
+   the viewport: one edge sits on the viewport edge, the other overflows. */
+.sky-video img,
+.sky-video video {
+  position: absolute;
+  inset: 0 auto 0 min(0%, 2 * var(--video-shift));
+  display: block;
+  width: calc(100% + 2 * max(var(--video-shift), -1 * var(--video-shift)));
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sky-video video {
+  opacity: 0;
+  transition: opacity 900ms var(--ease);
+}
+
+.sky-video video.playing {
+  opacity: 1;
+}
+
+/* iOS Low Power Mode: hide the start-playback overlay; the poster stays. */
+.sky-video video::-webkit-media-controls,
+.sky-video video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
 :focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;

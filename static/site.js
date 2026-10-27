@@ -2,7 +2,7 @@
 // `theme` = 'night' | 'day' (absent = auto); the inline head script applies it
 // before first paint. Here: clicks, OS changes in auto, and the u_night tween.
 // Also sets the ocean's content-page mode (oceanMode), plays the video page
-// (videoMode) and wires htmx page swaps.
+// (videoMode, the faint sky video on home) and wires htmx page swaps.
 (function () {
   'use strict';
   var STORAGE_KEY = 'theme';
@@ -106,8 +106,8 @@
   });
 
   // Content pages calm the ocean behind the panel: slow waves, half resolution,
-  // 15 fps. Reduced motion slows the waves further. The video page covers the
-  // ocean, so it stops rendering there. Re-callable when the page content
+  // 15 fps. Reduced motion slows the waves further. The Digital Sun page covers
+  // the ocean, so it stops rendering there. Re-callable when the page content
   // changes; `animate` eases the speed change (page swaps).
   function oceanMode(animate) {
     var ocean = window.__ocean;
@@ -123,10 +123,11 @@
     ocean.resize();
   }
 
-  // Video page: a muted loop started from here, never by markup (no autoplay,
+  // Digital Sun video (full page, and faint in the home sky): a muted loop
+  // started from here, never by markup (no autoplay,
   // preload="none"), so reduced motion and Save-Data / 2g fetch no video and
   // keep the poster. Paused while the tab is hidden; released once swapped out.
-  var video = null; // the current page's .video-page video, once seen
+  var video = null; // the current page's video (Digital Sun page, or faint on home), once seen
 
   function videoAllowed() {
     var connection = navigator.connection;
@@ -152,7 +153,7 @@
 
   function videoMode() {
     releaseDetachedVideo();
-    video = document.querySelector('.video-page video');
+    video = document.querySelector('.video-page video, .sky-video video');
     if (!video) return;
     if (document.hidden || !videoAllowed()) return pauseVideo();
     video.muted = true;

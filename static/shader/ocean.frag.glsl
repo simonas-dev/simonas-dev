@@ -28,7 +28,6 @@ const float CAMERA_FOCAL = 1.5;   // focal length in half-viewport-heights
 const float CAMERA_DRIFT = 0.08;  // origin drift per unit of u_waveTime
 const float CAMERA_SWELL = 0.015; // height swell amplitude (iTime)
 
-const vec3 SUN_DIR = vec3(0.0, 0.2588, 0.9659); // ~15 deg above horizon, ahead
 
 vec2 wavedx(vec2 p, vec2 d, float freq, float t) {
   float x = dot(d, p) * freq + t;
@@ -77,16 +76,11 @@ float intersectPlane(vec3 origin, vec3 dir, vec3 point, vec3 normal) {
   return clamp(dot(point - origin, normal) / dot(dir, normal), -1.0, 9991999.0);
 }
 
-// Simple sky: vertical gradient plus a static soft sun lobe.
+// Simple sky: a plain vertical gradient. No sun or moon lobe (owner: no bright
+// spot in the sky; the faint Digital Sun video on home is the only "sun").
 vec3 sky(vec3 dir) {
   float up = clamp(dir.y, 0.0, 1.0);
-  vec3 col = mix(vec3(0.86), vec3(0.6), pow(up, 0.6));
-  float sun = clamp(dot(dir, SUN_DIR), 0.0, 1.0); // ripple normals can push |R| > 1
-  vec3 day = vec3(0.12) * pow(sun, 6.0) + vec3(0.2) * pow(sun, 64.0);
-  // Night: same direction, a tighter dimmer moon with a soft halo.
-  vec3 moon = vec3(0.05) * pow(sun, 40.0) + vec3(0.35) * pow(sun, 3000.0);
-  col += mix(day, moon, u_night);
-  return col;
+  return mix(vec3(0.86), vec3(0.6), pow(up, 0.6));
 }
 
 vec3 cameraRay(vec2 fragCoord) {
