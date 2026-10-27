@@ -22,6 +22,25 @@
   src: url("/fonts/newsreader-latin-400-italic.woff2") format("woff2");
 }
 
+/* Registered so the theme switch interpolates them (one transition on <html>). */
+@property --paper {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #faf9f6;
+}
+
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #353431;
+}
+
+@property --surface {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #faf9f6;
+}
+
 :root {
   --z-canvas: 0;
   --z-logo: 10;
@@ -29,6 +48,7 @@
   --z-chrome: 200;
 
   --paper: #faf9f6;
+  --surface: #faf9f6;
   --ink: #353431;
 
   --font-serif: "Newsreader", Georgia, serif;
@@ -57,7 +77,14 @@
   --dur-theme: 900ms;
 }
 
-/* Night palette; applied by the theme toggle in M3. */
+html {
+  transition:
+    --paper var(--dur-theme) var(--ease),
+    --ink var(--dur-theme) var(--ease),
+    --surface var(--dur-theme) var(--ease);
+}
+
+/* Night palette; set on <html> by the inline head script and site.js. */
 .theme-night {
   --paper: #1a1a1a;
   --surface: #2e2d2b;
@@ -244,12 +271,17 @@ footer.chrome small {
   color: inherit;
   background: none;
   border: 0;
-  padding: 0;
-  cursor: default;
+  /* Hit area ≥ 24×24 without moving the right-aligned label. */
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  margin-right: -0.5rem;
+  cursor: pointer;
 }
 
+/* No JS: site.js never enables it. */
 .theme-toggle:disabled {
   opacity: 0.55;
+  cursor: default;
 }
 
 @media (max-width: 39.99rem) {

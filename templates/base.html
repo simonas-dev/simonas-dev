@@ -10,10 +10,12 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <script>(function(){try{var t=localStorage.getItem('theme')}catch(e){}if(t=='night'||t!='day'&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('theme-night')})()</script>
   <link rel="stylesheet" href="/styles.css">
   <link rel="preload" href="/shader/ocean.vert.glsl" as="fetch" crossorigin>
   <link rel="preload" href="/shader/ocean.frag.glsl" as="fetch" crossorigin>
   <script src="/ocean.js" defer></script>
+  <script src="/site.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -41,7 +43,7 @@
   </div>
   <footer class="chrome">
     <small>&copy; {{ now() | date(format="%Y") }} Simonas Sankauskas · <a href="/feed.xml">RSS</a></small>
-    <button type="button" class="theme-toggle" disabled aria-label="Theme: Auto (coming soon)">Auto</button>
+    <button type="button" class="theme-toggle" disabled aria-label="Theme: Auto">Auto</button>
   </footer>
 </body>
 </html>

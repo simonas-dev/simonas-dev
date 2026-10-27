@@ -22,3 +22,5 @@ Advisors treat entries here as the contract. Newest last.
 | 2026-10-27 | M2 | Night colours | `#1a1a1a` bg / `#2e2d2b` surface, light ink `#e8e6e1`; `.theme-night` only, no prefers-color-scheme until M3 | autopilot (council) |
 | 2026-10-27 | M2 | Mobile menu / toggle | `<details>` menu (no JS); theme toggle visible but `disabled` until M3; menu paper texture via CSS var hook until M4 | autopilot (council majority) |
 | 2026-10-27 | M2 | ocean.js budget | Stays < 10,240 B; horizon setter paid for by trimming comments | autopilot (perf+skeptic) |
+| 2026-10-27 | M3 | Night shader look | Darken night sky/scene in shader so `#e8e6e1` ink is readable (deviates from PLAN night formula) | autopilot (council rec) |
+| 2026-10-27 | M3 | Theme mechanics | Key `theme` in localStorage (absent = auto = OS); inline head script + `site.js` (tween) + ocean.js; meta color-scheme stays `light` | autopilot (council) |

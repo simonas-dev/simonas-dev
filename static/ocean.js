@@ -31,8 +31,8 @@
   // Horizon height / canvas height: 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH), see ocean.frag.glsl.
   var HORIZON = 0.5 + 0.75 * Math.tan(0.12);
 
-  // Shared state; later milestones drive `speed` and `night`.
-  var state = window.__ocean = { speed: 1, night: 0, tier: null };
+  // site.js tweens `night`; seeded from the head script's class.
+  var state = window.__ocean = { speed: 1, night: +root.classList.contains('theme-night'), tier: null };
 
   var gl = null;
   var program = null;
@@ -128,7 +128,7 @@
     gl.useProgram(program);
     uniforms = {};
     UNIFORM_NAMES.forEach(function (name) {
-      uniforms[name] = gl.getUniformLocation(program, name); // may be null
+      uniforms[name] = gl.getUniformLocation(program, name);
     });
     if (uniforms.u_noiseScale) gl.uniform1f(uniforms.u_noiseScale, NOISE_SCALE);
     state.tier = tier.name;
@@ -184,7 +184,6 @@
     probe.frames++;
     if (probe.frames <= PROBE_WARMUP_FRAMES) return false;
     probe.deltas.push(delta);
-    // Very slow device: skip to static.
     if (probe.deltas.length === PROBE_BAIL_FRAMES && Math.min.apply(null, probe.deltas) > PROBE_BAIL_MS) {
       return settleStatic();
     }
@@ -227,6 +226,11 @@
     draw(performance.now());
     root.classList.add('shader-ready');
   }
+
+  // Static tier has no loop; site.js calls this per tween tick.
+  state.redraw = function () {
+    if (isStatic && program && !gl.isContextLost()) drawStatic();
+  };
 
   function start(sources) {
     if (started) return;
@@ -286,7 +290,7 @@
   function onResize() {
     sizeDirty = true;
     root.style.setProperty('--scene-horizon-from-bottom', canvas.clientHeight * HORIZON + 'px');
-    if (isStatic && program && !gl.isContextLost()) drawStatic();
+    state.redraw();
   }
 
   if (window.ResizeObserver) {
@@ -299,7 +303,6 @@
   canvas.addEventListener('webglcontextlost', function (event) {
     event.preventDefault();
     stopLoop();
-    // Lost-context objects are invalid.
     program = null;
     quadBuffer = null;
     started = false;

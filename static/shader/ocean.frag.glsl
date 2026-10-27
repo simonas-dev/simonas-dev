@@ -15,6 +15,7 @@ uniform float u_noiseScale;
 #define RAYMARCH_STEPS 64
 #define WATER_DEPTH 1.0
 #define PI 3.14159265
+#define NIGHT_DIM 0.32
 
 // Fixed camera. Screen horizon (ray.y == 0) sits at
 //   horizonFromBottom = 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH)
@@ -97,6 +98,8 @@ float gaussian(float z, float mu, float sigma) {
 
 vec3 post(vec3 color, vec2 uv) {
   float gray = dot(color, vec3(0.299, 0.587, 0.114));
+  // Night: dim the scene so light ink (#e8e6e1) stays readable on the sky.
+  gray *= mix(1.0, NIGHT_DIM, u_night);
   float n = fract(sin(dot(uv * u_noiseScale, vec2(12.9898, 78.233))) * 43758.5453 + u_grainTime * 1.5);
   n = gaussian(n, 0.0, mix(0.75, 0.6, u_night));
   gray = clamp(gray + n * (1.0 - gray) * mix(0.4, 0.065, u_night), 0.0, 1.0);

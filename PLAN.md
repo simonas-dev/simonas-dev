@@ -102,9 +102,9 @@ simonas-dev/
 - [x] Mobile menu panel with paper texture and gradient mask (M2: `--paper-texture` hook on flat paper; paper.png lands in M4)
 
 ### M3 — Day / night (½ day)
-- [ ] Three-state toggle: auto → night → day, stored in `localStorage`
-- [ ] `.theme-night` class on `<html>`; CSS transition 900ms with `cubic-bezier(0.333333, 0, 0.666667, 1)` to match shader `smoothstep`
-- [ ] Animate `u_night` 0↔1 in the render loop over the same duration
+- [x] Three-state toggle: auto → night → day, stored in `localStorage`
+- [x] `.theme-night` class on `<html>`; CSS transition 900ms with `cubic-bezier(0.333333, 0, 0.666667, 1)` to match shader `smoothstep`
+- [x] Animate `u_night` 0↔1 in the render loop over the same duration
 
 ### M4 — Content pages (1 day)
 - [ ] `.content-surface` panel: paper texture under a 97% tint, slight blur backdrop, max-width ~68ch
