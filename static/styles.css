@@ -1,15 +1,104 @@
-/* M0 scaffold: layer stack + baseline only. Typography and tokens land in M2. */
+@font-face {
+  font-family: "Departure Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/DepartureMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/newsreader-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Newsreader";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/newsreader-latin-400-italic.woff2") format("woff2");
+}
+
 :root {
   --z-canvas: 0;
   --z-logo: 10;
   --z-page: 100;
   --z-chrome: 200;
+
+  --paper: #faf9f6;
+  --ink: #353431;
+
+  --font-serif: "Newsreader", Georgia, serif;
+  --font-mono: "Departure Mono", ui-monospace, Menlo, monospace;
+
+  --step-0: clamp(1.0625rem, 0.98rem + 0.35vw, 1.25rem);
+  --step-1: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-2: clamp(1.5rem, 1.2rem + 1.5vw, 2.375rem);
+  --step-3: clamp(2rem, 1.2rem + 3.2vw, 3.75rem);
+  /* Departure Mono is drawn on an 11px pixel grid; stay on it for crisp glyphs. */
+  --mono-size: 0.6875rem;
+  --lh: 1.6;
+  --measure: 68ch;
+
+  --frame-inline: clamp(20px, 5.2083vw, 75px);
+  --frame-block: clamp(20px, 5.2083vw, 75px);
+  --chrome-line: 1.5rem;
+  --page-pad-block: calc(var(--frame-block) + var(--chrome-line) + 1.5rem);
+  --hero-gap: 1rem;
+
+  /* Shader horizon (ocean.frag.glsl camera); ocean.js overwrites with canvas px. */
+  --scene-horizon-from-bottom: 59.05vh;
+  --scene-horizon-from-bottom: 59.05dvh;
+
+  --ease: cubic-bezier(0.333333, 0, 0.666667, 1);
+  --dur-theme: 900ms;
+}
+
+/* Night palette; applied by the theme toggle in M3. */
+.theme-night {
+  --paper: #1a1a1a;
+  --surface: #2e2d2b;
+  --ink: #e8e6e1;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  background: #faf9f6;
-  color: #353431;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--step-0);
+  line-height: var(--lh);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+h1 {
+  font-size: var(--step-3);
+}
+
+h2 {
+  font-size: var(--step-2);
+}
+
+h3 {
+  font-size: var(--step-1);
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
 #ocean {
@@ -22,7 +111,7 @@ body {
   /* Backing store is 0.35–0.4× of CSS size; let the browser smooth the upscale. */
   image-rendering: auto;
   opacity: 0;
-  transition: opacity 1000ms cubic-bezier(0.333333, 0, 0.666667, 1);
+  transition: opacity 1000ms var(--ease);
 }
 
 /* Set on <html> by ocean.js once a quality tier is settled and a frame drawn. */
@@ -32,22 +121,62 @@ body {
 
 .logo {
   position: fixed;
-  top: 1rem;
+  top: var(--frame-block);
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-logo);
+  font-size: var(--step-0);
+  line-height: var(--chrome-line);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .page {
   position: relative;
   z-index: var(--z-page);
-  padding: 4rem 1.25rem;
+  padding: var(--page-pad-block) var(--frame-inline);
   /* Let clicks through the padding to the logo underneath. */
   pointer-events: none;
 }
 
 .page > * {
   pointer-events: auto;
+}
+
+/* Home: text sits on the sky, just above the shader horizon. */
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  min-height: calc(100svh - var(--page-pad-block));
+  margin-bottom: calc(-1 * var(--page-pad-block));
+  padding-bottom: calc(var(--scene-horizon-from-bottom) + var(--hero-gap));
+}
+
+.hero > * {
+  margin: 0;
+}
+
+.hero p {
+  font-size: var(--step-1);
+  line-height: 1.3;
+}
+
+/* Short landscape screens: keep the hero between header and horizon. */
+@media (max-height: 30rem) {
+  :root {
+    --page-pad-block: calc(var(--frame-block) + var(--chrome-line) + 0.5rem);
+    --hero-gap: 0.75rem;
+  }
+
+  .hero h1 {
+    font-size: var(--step-2);
+  }
+
+  .hero p {
+    font-size: var(--step-0);
+  }
 }
 
 .chrome {
@@ -57,26 +186,123 @@ body {
   z-index: var(--z-chrome);
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: 1rem;
-  padding: 1rem 1.25rem;
+  padding: 0 var(--frame-inline);
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
+  line-height: var(--chrome-line);
+}
+
+header.chrome a {
+  text-decoration: none;
+}
+
+header.chrome a:hover {
+  text-decoration: underline;
 }
 
 header.chrome {
-  top: 0;
+  top: var(--frame-block);
   justify-content: flex-end;
   pointer-events: none;
 }
 
-header.chrome a {
+header.chrome a,
+header.chrome summary {
   pointer-events: auto;
+}
+
+.nav-inline {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.menu {
+  display: none;
 }
 
 footer.chrome {
   bottom: 0;
+  padding-top: 2rem;
+  padding-bottom: var(--frame-block);
+  /* Soft paper scrim so the footer reads over dark water troughs. */
+  background: linear-gradient(to top, color-mix(in srgb, var(--paper) 85%, transparent) calc(var(--frame-block) + var(--chrome-line)), transparent);
+  pointer-events: none;
 }
 
-nav a + a {
-  margin-left: 1rem;
+footer.chrome > * {
+  pointer-events: auto;
+}
+
+footer.chrome small {
+  font-size: inherit;
+}
+
+.theme-toggle {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: default;
+}
+
+.theme-toggle:disabled {
+  opacity: 0.55;
+}
+
+@media (max-width: 39.99rem) {
+  .nav-inline {
+    display: none;
+  }
+
+  .menu {
+    display: block;
+  }
+
+  .menu summary {
+    position: relative;
+    z-index: 1;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: calc(var(--frame-block) + var(--chrome-line) + 1rem) var(--frame-inline) 4rem;
+    /* --paper-texture: paper.png hook (M4). */
+    background: var(--paper) var(--paper-texture, none);
+    -webkit-mask-image: linear-gradient(#000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(#000 calc(100% - 3rem), transparent);
+    font-size: calc(var(--mono-size) * 2);
+    line-height: 1.5;
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 39.99rem) and (prefers-reduced-motion: no-preference) {
+  .menu[open] .menu-panel {
+    animation: menu-in 220ms var(--ease);
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
 }
 
 img {
@@ -95,8 +321,8 @@ img {
   left: 0.5rem;
   z-index: calc(var(--z-chrome) + 1);
   padding: 0.5rem 0.75rem;
-  background: #faf9f6;
-  color: #353431;
+  background: var(--paper);
+  color: var(--ink);
   transform: translateY(-200%);
 }
 

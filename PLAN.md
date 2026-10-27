@@ -94,12 +94,12 @@ simonas-dev/
 - [x] Fade canvas in via `.shader-ready` class (opacity 0 → 1 over 1s)
 
 ### M2 — Typography & chrome (1 day)
-- [ ] Load fonts with `preload` + `font-display: swap`
-- [ ] CSS tokens: type scale with `clamp()`, `--frame-inline/--frame-block` (≈75px desktop, ≈20px mobile), colours `#353431` on `#faf9f6`, night `#1a1a1a` / `#2e2d2b`
-- [ ] Header: small logo/wordmark top-centre, mono nav top-right
-- [ ] Footer bar: name/© left, theme toggle right
-- [ ] Hero text aligned to the shader's horizon (`--scene-horizon-from-bottom`, updated from JS)
-- [ ] Mobile menu panel with paper texture and gradient mask
+- [x] Load fonts with `preload` + `font-display: swap`
+- [x] CSS tokens: type scale with `clamp()`, `--frame-inline/--frame-block` (≈75px desktop, ≈20px mobile), colours `#353431` on `#faf9f6`, night `#1a1a1a` / `#2e2d2b`
+- [x] Header: small logo/wordmark top-centre, mono nav top-right
+- [x] Footer bar: name/© left, theme toggle right
+- [x] Hero text aligned to the shader's horizon (`--scene-horizon-from-bottom`, updated from JS)
+- [x] Mobile menu panel with paper texture and gradient mask (M2: `--paper-texture` hook on flat paper; paper.png lands in M4)
 
 ### M3 — Day / night (½ day)
 - [ ] Three-state toggle: auto → night → day, stored in `localStorage`

@@ -1,7 +1,5 @@
-// Ocean background: WebGL setup, quality tiers, render loop.
-// The canvas stays invisible until a tier is settled and a frame is drawn;
-// then `shader-ready` on <html> fades it in. Without WebGL the flat paper
-// body background shows and `no-webgl` is set on <html>.
+// Ocean background: WebGL setup, quality tiers, render loop. `shader-ready`
+// on <html> fades the canvas in once a tier settles; else `no-webgl`.
 (function () {
   'use strict';
   if (window.__ocean) return;
@@ -30,6 +28,8 @@
   var TIER_STORAGE_KEY = 'ocean-tier';
   var STATIC_TIER = 'static';
   var UNIFORM_NAMES = ['iResolution', 'iTime', 'u_waveTime', 'u_grainTime', 'u_night', 'u_noiseScale'];
+  // Horizon height / canvas height: 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH), see ocean.frag.glsl.
+  var HORIZON = 0.5 + 0.75 * Math.tan(0.12);
 
   // Shared state; later milestones drive `speed` and `night`.
   var state = window.__ocean = { speed: 1, night: 0, tier: null };
@@ -285,6 +285,7 @@
 
   function onResize() {
     sizeDirty = true;
+    root.style.setProperty('--scene-horizon-from-bottom', canvas.clientHeight * HORIZON + 'px');
     if (isStatic && program && !gl.isContextLost()) drawStatic();
   }
 
@@ -292,6 +293,7 @@
     new ResizeObserver(onResize).observe(canvas);
   } else {
     window.addEventListener('resize', onResize);
+    onResize();
   }
 
   canvas.addEventListener('webglcontextlost', function (event) {
