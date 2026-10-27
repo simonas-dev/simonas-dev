@@ -195,7 +195,7 @@
     var url = new URL(link.href || event.detail.pathInfo.requestPath, location.href);
     var lastSegment = url.pathname.split('/').pop();
     var fileExtension = /\.([^.]+)$/.exec(lastSegment);
-    // Downloads and non-page files (the .apk, feeds) must not be fetched as XHR.
+    // Downloads and non-page files (e.g. feeds) must not be fetched as XHR.
     if ((fileExtension && fileExtension[1] !== 'html') || link.hasAttribute('download') ||
         (link.target && link.target !== '_self')) {
       event.preventDefault();

@@ -16,12 +16,12 @@ zola check   # build + check external links
 ```
 
 Content lives in `content/` (Markdown), templates in `templates/`, and static
-assets (images, favicon, APK, `styles.css`) in `static/`. The RSS feed is
+assets (images, favicon, `styles.css`) in `static/`. The RSS feed is
 generated at `/feed.xml` from `templates/feed.xml`.
 
 ## Deploy
 
 Hosted on Vercel. `vercel.json` downloads the pinned Zola 0.23.6 Linux binary,
 runs `./zola build`, and serves `public/`. It also holds 301 redirects for old
-URLs (`/posts/wizard`, `/tags/*`). Keep the Zola version in `vercel.json` in
-sync with the one used locally.
+URLs (`/posts/wizard`, `/posts/ballistic-wizard`, `/about`, `/tags/*` → `/`).
+Keep the Zola version in `vercel.json` in sync with the one used locally.

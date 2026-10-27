@@ -7,6 +7,7 @@
   <meta name="htmx-config" content='{"refreshOnHistoryMiss":true,"includeIndicatorStyles":false}'>
   <title>{% block title %}{{ config.title }}{% endblock title %}</title>
   <meta name="description" content="{% block description %}{{ config.description }}{% endblock description %}">
+  {% block robots %}{% endblock robots %}
   <link rel="alternate" type="application/rss+xml" title="{{ config.title }}" href="/feed.xml">
   {%- set og_title = config.title %}
   {%- if page and page.title %}{% set og_title = page.title %}{% elif section and section.title %}{% set og_title = section.title %}{% endif %}
@@ -36,15 +37,11 @@
   {%- set path = current_path | default(value="") %}
   <header class="chrome">
     <nav class="nav-inline" aria-label="Main">
-      <a href="/about/"{% if path == "/about/" %} aria-current="page"{% endif %}>About</a>
-      <a href="/posts/"{% if path == "/posts/" %} aria-current="page"{% endif %}>Posts</a>
       <a href="/photos/"{% if path == "/photos/" %} aria-current="page"{% endif %}>Photos</a>
     </nav>
     <details class="menu">
       <summary>Menu</summary>
       <nav class="menu-panel" aria-label="Main">
-        <a href="/about/"{% if path == "/about/" %} aria-current="page"{% endif %}>About</a>
-        <a href="/posts/"{% if path == "/posts/" %} aria-current="page"{% endif %}>Posts</a>
         <a href="/photos/"{% if path == "/photos/" %} aria-current="page"{% endif %}>Photos</a>
       </nav>
     </details>

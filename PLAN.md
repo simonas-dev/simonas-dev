@@ -51,15 +51,13 @@ simonas-dev/
   config.toml            # Zola config
   content/
     _index.md            # home
-    about.md
-    photos.md
+    photos.md            # (about.md removed in M8)
     posts/
-      _index.md
-      ballistic-wizard.md
+      _index.md          # (ballistic-wizard.md removed in M8)
   templates/
     base.html            # <head>, canvas, header, footer, scripts
-    index.html           # home hero
-    page.html            # about / projects
+    index.html           # home (ocean only, hidden h1)
+    page.html            # photos / projects
     section.html         # posts list
     post.html            # single post
   static/
@@ -208,33 +206,33 @@ stereo AAC). The master never enters git; add `*.mov` to `.gitignore`.
 Owner feedback after reviewing M0–M4. Remove content that doesn't earn its place.
 
 Home hero:
-- [ ] Remove the hero text ("Simonas Sankauskas" heading + "Senior Software Engineer,
+- [x] Remove the hero text ("Simonas Sankauskas" heading + "Senior Software Engineer,
       Android.") from `content/_index.md` / `templates/index.html`; home becomes the
       ocean + header wordmark + chrome only
-- [ ] Clean up what only existed for the hero text (hero styles, horizon-alignment
+- [x] Clean up what only existed for the hero text (hero styles, horizon-alignment
       hook `--scene-horizon-from-bottom` if now unused); keep an accessible page
       `<h1>` (visually hidden) and the `<title>`/meta description
 
 Remove the Ballistic Wizard post:
-- [ ] Delete `content/posts/ballistic-wizard.md`
-- [ ] Delete its assets if nothing else uses them: `static/images/baller-wizard.jpg`,
+- [x] Delete `content/posts/ballistic-wizard.md`
+- [x] Delete its assets if nothing else uses them: `static/images/baller-wizard.jpg`,
       `static/ballistic-wizard-1.0.0.apk` (still in git history)
-- [ ] Old URLs `/posts/wizard` and `/posts/ballistic-wizard/`: drop the alias and the
+- [x] Old URLs `/posts/wizard` and `/posts/ballistic-wizard/`: drop the alias and the
       `vercel.json` redirect; decide 410/404 vs 301 → `/posts/` (default: 301 → `/`
       so old links land somewhere)
-- [ ] Posts section is now empty: hide "Posts" from nav and decide what `/posts/`
+- [x] Posts section is now empty: hide "Posts" from nav and decide what `/posts/`
       does (default: keep the section, render an empty-state line, `noindex`)
-- [ ] `/feed.xml` must stay valid with zero items (existing subscribers keep the URL)
-- [ ] Update README/PLAN references to the post; `zola check` + curl old URLs
+- [x] `/feed.xml` must stay valid with zero items (existing subscribers keep the URL)
+- [x] Update README/PLAN references to the post; `zola check` + curl old URLs
 
 Remove the About page:
-- [ ] Delete `content/about.md` ("I am a Senior Software Engineer with 7 years
+- [x] Delete `content/about.md` ("I am a Senior Software Engineer with 7 years
       of experience" + GitHub / Instagram / LinkedIn links)
-- [ ] Remove "About" from the header nav and the mobile menu in `templates/base.html`
-- [ ] `/about/` (bookmarks, search results): 301 → `/` in `vercel.json`
-- [ ] Social links are not moved elsewhere unless the owner asks (default: dropped);
+- [x] Remove "About" from the header nav and the mobile menu in `templates/base.html`
+- [x] `/about/` (bookmarks, search results): 301 → `/` in `vercel.json`
+- [x] Social links are not moved elsewhere unless the owner asks (default: dropped);
       drop the LinkedIn `[link_checker] skip_prefixes` entry if nothing links there
-- [ ] Nav after M8 = Photos (+ video page from M7); verify header, mobile menu,
+- [x] Nav after M8 = Photos (+ video page from M7, not yet built); verify header, mobile menu,
       and footer still balance with fewer items
 
 ## Shader notes

@@ -8,17 +8,42 @@
   "redirects": [
     {
       "source": "/posts/wizard",
-      "destination": "/posts/ballistic-wizard/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/wizard/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/ballistic-wizard",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/posts/ballistic-wizard/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/about",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/about/",
+      "destination": "/",
       "statusCode": 301
     },
     {
       "source": "/tags/:path*/",
-      "destination": "/posts/",
+      "destination": "/",
       "statusCode": 301
     },
     {
       "source": "/tags/:path*",
-      "destination": "/posts/",
+      "destination": "/",
       "statusCode": 301
     }
   ]

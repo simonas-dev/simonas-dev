@@ -28,8 +28,7 @@
   var TIER_STORAGE_KEY = 'ocean-tier';
   var STATIC_TIER = 'static';
   var UNIFORM_NAMES = ['iResolution', 'iTime', 'u_waveTime', 'u_grainTime', 'u_night', 'u_noiseScale'];
-  // Horizon/canvas height = shader 0.5+0.5*CAMERA_FOCAL*tan(CAMERA_PITCH).
-  var HORIZON = 0.382;
+  // The 38.2% horizon lives in CAMERA_PITCH in ocean.frag.glsl.
 
   // site.js sets speed/res/fps and tweens night.
   var state = window.__ocean = { speed: 1, res: 1, fps: 0, resize: onResize, night: +root.classList.contains('theme-night'), tier: null };
@@ -301,7 +300,6 @@
 
   function onResize() {
     sizeDirty = true;
-    root.style.setProperty('--scene-horizon-from-bottom', canvas.clientHeight * HORIZON + 'px');
     state.redraw();
   }
 

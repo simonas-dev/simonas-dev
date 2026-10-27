@@ -11,7 +11,3 @@ feed_filenames = ["feed.xml"]
 [markdown]
 # loading="lazy" decoding="async" on Markdown images.
 lazy_async_image = true
-
-[link_checker]
-# LinkedIn answers bots with HTTP 999.
-skip_prefixes = ["https://www.linkedin.com/"]

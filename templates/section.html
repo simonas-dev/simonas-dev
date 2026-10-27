@@ -2,10 +2,13 @@
 
 {% block title %}{{ section.title }} — {{ config.title }}{% endblock title %}
 
+{% block robots %}{% if section.pages | length == 0 %}<meta name="robots" content="noindex">{% endif %}{% endblock robots %}
+
 {% block content %}
 <section class="content-surface">
   <h1>{{ section.title }}</h1>
   {{ section.content | safe }}
+  {% if section.pages | length > 0 %}
   <ul class="post-list">
     {% for page in section.pages %}
     <li>
@@ -14,5 +17,8 @@
     </li>
     {% endfor %}
   </ul>
+  {% else %}
+  <p class="meta">Nothing here yet.</p>
+  {% endif %}
 </section>
 {% endblock content %}

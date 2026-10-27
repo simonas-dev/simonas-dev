@@ -41,3 +41,7 @@ Advisors treat entries here as the contract. Newest last.
 | 2026-10-27 | M6 | ocean.js budget | Raised to 11,264 B raw (from 10,240); no minify step; policy stays in site.js, visuals in GLSL | autopilot (council unanimous) |
 | 2026-10-27 | M6 | Logo in shader | Deferred: superseded by owner's HTML mono wordmark | autopilot (council unanimous) |
 | 2026-10-27 | M6 | Ripples timing | Ship on `rewrite` with GLSL-side projection (no duplicated camera consts), gated on the rewrite-sea diff applying cleanly; else defer to M6b | autopilot (council majority) |
+| 2026-10-27 | M8 | Removed URLs | `/posts/wizard`, `/posts/ballistic-wizard`, `/about` (both slash variants) 301 → `/`; `/tags/*` retargeted `/posts/` → `/` (revises M0 row; `/posts/` is now empty + noindex) | autopilot (council unanimous / PLAN default) |
+| 2026-10-27 | M8 | Empty Posts section | Keep `/posts/`, hidden from nav; empty-state line + `noindex` only while zero pages; excluded from sitemap while empty; feed.xml stays (0 items); footer RSS link kept; social links dropped | autopilot (PLAN default, council) |
+| 2026-10-27 | M8 | Horizon DOM mirror | `--scene-horizon-from-bottom` and `HORIZON` in ocean.js retired (only consumer was the removed hero); 38.2% composition stays in shader `CAMERA_PITCH` — owner horizon row otherwise unchanged | autopilot (council majority) |
+| 2026-10-27 | M8 | Mobile menu | Keep `<details>` menu with one item (Photos) pending M7's second item; M2 decision unchanged | autopilot (supervisor; council split) |
