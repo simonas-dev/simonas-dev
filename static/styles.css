@@ -196,13 +196,13 @@ html.sun-crossfade::view-transition-new(root) {
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); /* symmetric: 50/50 at the midpoint */
 }
 
-/* Chrome snapshots the 5% home video as opaque black: show its poster for the fade. */
+/* Chrome bug: any image painted inside the faint, masked .sky-video layer
+   leaves a transparent hole in the view-transition snapshot (the sky drops to
+   black at the start of the fade). Video is fine. So the sky poster is never
+   rendered while the video plays (display: none below), and in poster-only
+   mode it sits out the crossfade. */
 html.sun-crossfade .sky-video picture {
-  visibility: visible;
-}
-
-html.sun-crossfade .sky-video video {
-  visibility: hidden;
+  display: none;
 }
 
 html.sun-crossfade .page.htmx-swapping #main > *,
@@ -570,17 +570,19 @@ img {
 }
 
 /* Autoplaying: no poster, the video fades in from black (see html.video-ok). */
-.video-ok .video-poster,
-.video-ok .sky-video picture {
+.video-ok .video-poster {
   visibility: hidden;
+}
+
+.video-ok .sky-video:not(.video-failed) picture {
+  display: none;
 }
 
 /* Except while crossfading in from home: the incoming page must show the sun
    from its first frame (the poster is cached from home), not black while the
    video starts; the poster/video colour step then falls inside the blend. */
 html.sun-crossfade.video-ok .video-page .video-poster,
-.video-ok .video-failed .video-poster,
-.video-ok .sky-video.video-failed picture {
+.video-ok .video-failed .video-poster {
   visibility: visible;
 }
 
