@@ -151,14 +151,21 @@
     video = null;
   }
 
+  // html.video-ok (set in <head> before first paint) hides the poster so the
+  // video fades in from black; .video-failed on the container brings it back.
+  function posterFallback(on) {
+    if (video && video.parentElement) video.parentElement.classList.toggle('video-failed', on);
+  }
+
   function videoMode() {
     releaseDetachedVideo();
+    root.classList.toggle('video-ok', videoAllowed());
     video = document.querySelector('.video-page video, .sky-video video');
     if (!video) return;
     if (document.hidden || !videoAllowed()) return pauseVideo();
     video.muted = true;
     var playing = video.play();
-    if (playing && playing.catch) playing.catch(function () { /* blocked: the poster stays */ });
+    if (playing && playing.catch) playing.catch(function () { posterFallback(true); /* blocked: show the poster */ });
   }
 
   // Warm the HTTP cache with the file the Digital Sun page will play, so the
@@ -199,6 +206,10 @@
       if (link) warmSunVideo();
     }, { capture: true, passive: true });
   });
+
+  document.addEventListener('error', function (event) {
+    if (video && event.target.parentElement === video) posterFallback(true);
+  }, true);
 
   // Media events don't bubble; capture them. The video fades in over the poster.
   document.addEventListener('playing', function (event) {

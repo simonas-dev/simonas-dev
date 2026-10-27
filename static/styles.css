@@ -541,6 +541,17 @@ img {
   object-fit: cover;
 }
 
+/* Autoplaying: no poster, the video fades in from black (see html.video-ok). */
+.video-ok .video-poster,
+.video-ok .sky-video picture {
+  visibility: hidden;
+}
+
+.video-ok .video-failed .video-poster,
+.video-ok .sky-video.video-failed picture {
+  visibility: visible;
+}
+
 .video-page video {
   opacity: 0;
   transition: opacity 900ms var(--ease);

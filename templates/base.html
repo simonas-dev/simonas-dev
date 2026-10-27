@@ -28,6 +28,9 @@
   <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <script>(function(){try{var t=localStorage.getItem('theme')}catch(e){}if(t=='night'||t!='day'&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('theme-night')})()</script>
+  {#- Video will autoplay (same gates as videoAllowed in site.js): fade it in from
+      black instead of crossfading over the poster, whose colour path differs. -#}
+  <script>(function(){var c=navigator.connection;if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(c&&(c.saveData||/2g/.test(c.effectiveType||''))))document.documentElement.classList.add('video-ok')})()</script>
   <link rel="stylesheet" href="/styles.css">
   <link rel="preload" href="/shader/ocean.vert.glsl" as="fetch" crossorigin>
   <link rel="preload" href="/shader/ocean.frag.glsl" as="fetch" crossorigin>
