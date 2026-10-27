@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="htmx-config" content='{"refreshOnHistoryMiss":true,"includeIndicatorStyles":false}'>
   <title>{% block title %}{{ config.title }}{% endblock title %}</title>
   <meta name="description" content="{% block description %}{{ config.description }}{% endblock description %}">
   <link rel="alternate" type="application/rss+xml" title="{{ config.title }}" href="/feed.xml">
@@ -15,9 +16,10 @@
   <link rel="preload" href="/shader/ocean.vert.glsl" as="fetch" crossorigin>
   <link rel="preload" href="/shader/ocean.frag.glsl" as="fetch" crossorigin>
   <script src="/ocean.js" defer></script>
+  <script src="/htmx.min.js" defer></script>
   <script src="/site.js" defer></script>
 </head>
-<body>
+<body hx-boost="true" hx-select="div.page" hx-target="div.page" hx-swap="outerHTML swap:220ms show:window:top">
   <a class="skip-link" href="#main">Skip to content</a>
   <canvas id="ocean" aria-hidden="true"></canvas>
   <a class="logo" href="/">{{ config.title }}</a>
@@ -36,13 +38,13 @@
       </nav>
     </details>
   </header>
-  <div class="page">
-    <main id="main">
+  <div class="page" hx-history-elt>
+    <main id="main" tabindex="-1">
       {% block content %}{% endblock content %}
     </main>
   </div>
   <footer class="chrome">
-    <small>&copy; {{ now() | date(format="%Y") }} Simonas Sankauskas · <a href="/feed.xml">RSS</a></small>
+    <small>&copy; {{ now() | date(format="%Y") }} Simonas Sankauskas · <a href="/feed.xml" hx-boost="false">RSS</a></small>
     <button type="button" class="theme-toggle" disabled aria-label="Theme: Auto">Auto</button>
   </footer>
 </body>

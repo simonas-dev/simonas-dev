@@ -165,10 +165,16 @@ a {
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-logo);
-  font-size: var(--step-0);
+  /* Same face/size as the nav items (owner decision). */
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
   line-height: var(--chrome-line);
   text-decoration: none;
   white-space: nowrap;
+}
+
+.logo:hover {
+  text-decoration: underline;
 }
 
 .page {
@@ -181,6 +187,24 @@ a {
 
 .page > * {
   pointer-events: auto;
+}
+
+/* htmx page swap: old content fades out during the 220ms swap delay, new
+   content fades in once htmx drops .htmx-added at settle. Animated below
+   .page, because opacity/transform on an ancestor of .content-surface would
+   break its backdrop-filter. */
+#main > * {
+  transition: opacity 220ms var(--ease), transform 220ms var(--ease);
+}
+
+.page.htmx-swapping #main > *,
+.page.htmx-added #main > * {
+  opacity: 0;
+  transform: translateY(0.5rem);
+}
+
+#main:focus {
+  outline: none;
 }
 
 /* Home: text sits on the sky, just above the shader horizon. */
@@ -367,6 +391,13 @@ footer.chrome small {
 @media (max-width: 39.99rem) and (prefers-reduced-motion: no-preference) {
   .menu[open] .menu-panel {
     animation: menu-in 220ms var(--ease);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page.htmx-swapping #main > *,
+  .page.htmx-added #main > * {
+    transform: none;
   }
 }
 

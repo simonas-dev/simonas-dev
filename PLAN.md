@@ -83,6 +83,7 @@ simonas-dev/
 - [x] `zola init`, `.gitignore`, `README.md`, `vercel.json`
 - [x] `base.html` with the layer stack: canvas (z 0) → logo (z 10) → page (z 100) → chrome (z 200)
 - [ ] Vercel builds from `main` with Zola; confirm `simonas-dev.vercel.app` serves the new site
+      _(Preview verified 2026-10-27: Vercel builds the Zola site from `rewrite` (musl binary, Node 24.x setting); remaining: merge to `main` + production deploy to simonas.dev, owner's call.)_
 - [x] Migrated content: home, about, photos, ballistic-wizard post, `/feed.xml`
 
 ### M1 — Ocean shader (1–2 days)
@@ -114,12 +115,46 @@ simonas-dev/
 - [x] When a content page is visible: shader drops to 15 fps, 0.5× resolution, wave speed ×0.15
 
 ### M5 — htmx navigation (½ day)
-- [ ] `hx-boost="true" hx-select="div.page" hx-target="div.page" hx-swap="outerHTML swap:220ms"`
-- [ ] Leave/enter CSS animations on `.page`
-- [ ] Scroll memory for back/forward; scroll to top on forward nav
-- [ ] Fallback to full navigation on any htmx error
+- [x] `hx-boost="true" hx-select="div.page" hx-target="div.page" hx-swap="outerHTML swap:220ms"`
+- [x] Leave/enter CSS animations on `.page`
+- [x] Scroll memory for back/forward; scroll to top on forward nav
+- [x] Fallback to full navigation on any htmx error
 
 ### M6 — Polish (ongoing)
+
+Owner feedback on the M1 ocean (do these first; later M6 items build on them):
+
+> **Parallel lane:** the "Calm sea" and "Composition" items below are being done in a
+> separate worktree/branch `rewrite-sea` (memo `.council/M6a.md`) and will be merged
+> into `rewrite` by the owner's session. **M6 on `rewrite` must skip them** and must not
+> edit `static/shader/ocean.frag.glsl` camera/wave constants or `HORIZON` in `ocean.js`.
+
+Calm sea: it currently reads stormy, moves too aggressively, and has too many
+spiky edges. Target: a calm, slow, glassy swell with soft rounded crests.
+- [ ] Slower motion: lower base wave speed (`u_waveTime` rate, ~0.4–0.5× today),
+      slower camera drift (`CAMERA_DRIFT`) and swell (`CAMERA_SWELL`)
+- [ ] Lower, broader waves: reduce wave height (`WATER_DEPTH` / height scale) and
+      favour low-frequency octaves (faster weight falloff than `w *= 0.82`)
+- [ ] Fewer spikes: reduce drag (`0.38`) and the peakiness of `exp(sin(x)-1)`;
+      fewer `ITERS_NORMAL` and/or fade high-frequency normal detail with distance,
+      so the 0.35–0.4× upscaled render doesn't shimmer
+- [ ] Re-check grain, night mode, content-page throttle (`speed 0.15`), and
+      reduced-motion against the calmer baseline; keep all quality tiers
+- [ ] Acceptance: before/after screenshots and a short capture (desktop + mobile,
+      day + night) recorded in `.council/M6.md`; no visible spiky crests at rest
+
+Composition: golden-ratio split, with the sky taking the larger part.
+- [ ] Horizon at 38.2% from the bottom of the viewport (sky 61.8% on top, sea
+      38.2% below). Today it is ~59% from the bottom (sea is the larger part).
+      With the current formula
+      `horizonFromBottom = 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH)` and
+      `CAMERA_FOCAL = 1.5`, that means `CAMERA_PITCH ≈ -0.156` rad (looking
+      slightly up); retune focal/height if the sea looks too flat
+- [ ] Keep JS and CSS in sync: `HORIZON` in `static/ocean.js` and the
+      `--scene-horizon-from-bottom` fallback in `static/styles.css` (38.2vh/dvh);
+      check anything positioned against the horizon (header scrim, footer fade,
+      sun glow, content surfaces) on desktop and mobile
+
 - [ ] Click ripples: project pointer onto the water plane, push to `u_ripples[10]`
 - [ ] Logo drawn into the shader as a texture so waves pass "through" it
 - [ ] Stars at night (hashed grid), sun/moon glow
@@ -135,6 +170,17 @@ frame, dark, slow). Not on the home page. No user controls.
 
 Source master: `/Users/simonas/Timeline 1.mov` (4K24 HEVC Main10, 45 s, 33 MB,
 stereo AAC). The master never enters git; add `*.mov` to `.gitignore`.
+
+> **Lane B done (pre-encoded, max fidelity):** assets are ready in
+> `~/Projects/simonas-dev-video/out/` (see its README). Loop 7.00–19.25 s, seamless,
+> encoded from a lossless 4K cut of the original. Tiers: 4K (3840×2160 / portrait
+> 1728×2160) in AV1 10-bit + HEVC Main10 `hvc1` (~5.7 Mbps, same as the original) for
+> large/hi-DPI screens; 1080 (1920×1080 / 1080×1350) in AV1 10-bit + H.264 for the
+> rest; posters AVIF + WebP. `preview.html` holds the exact `<source>` order, media
+> queries and codec strings to reuse in `templates/video.html`. M7 copies `out/*` into
+> `static/video/` and ticks the encode/variants/poster items after verifying; the
+> ≤ 2 MB target is superseded for the 4K tier (owner: preserve original quality).
+> Phones never receive 4K. Re-encode only via that folder's `encode.sh`.
 
 - [ ] Encode with ffmpeg into `static/video/`: drop audio; pick a 10–20 s span and
       crossfade end→start into a seamless loop; light encode-time grain to mask
@@ -156,6 +202,40 @@ stereo AAC). The master never enters git; add `*.mov` to `.gitignore`.
 - [ ] Pause on `visibilitychange`; video element is removed with the page on
       htmx navigation so it stops decoding
 - [ ] Linked from Photos (and/or Projects/nav — owner decision); excluded from the feed
+
+### M8 — Content edits (½ day)
+
+Owner feedback after reviewing M0–M4. Remove content that doesn't earn its place.
+
+Home hero:
+- [ ] Remove the hero text ("Simonas Sankauskas" heading + "Senior Software Engineer,
+      Android.") from `content/_index.md` / `templates/index.html`; home becomes the
+      ocean + header wordmark + chrome only
+- [ ] Clean up what only existed for the hero text (hero styles, horizon-alignment
+      hook `--scene-horizon-from-bottom` if now unused); keep an accessible page
+      `<h1>` (visually hidden) and the `<title>`/meta description
+
+Remove the Ballistic Wizard post:
+- [ ] Delete `content/posts/ballistic-wizard.md`
+- [ ] Delete its assets if nothing else uses them: `static/images/baller-wizard.jpg`,
+      `static/ballistic-wizard-1.0.0.apk` (still in git history)
+- [ ] Old URLs `/posts/wizard` and `/posts/ballistic-wizard/`: drop the alias and the
+      `vercel.json` redirect; decide 410/404 vs 301 → `/posts/` (default: 301 → `/`
+      so old links land somewhere)
+- [ ] Posts section is now empty: hide "Posts" from nav and decide what `/posts/`
+      does (default: keep the section, render an empty-state line, `noindex`)
+- [ ] `/feed.xml` must stay valid with zero items (existing subscribers keep the URL)
+- [ ] Update README/PLAN references to the post; `zola check` + curl old URLs
+
+Remove the About page:
+- [ ] Delete `content/about.md` ("I am a Senior Software Engineer with 7 years
+      of experience" + GitHub / Instagram / LinkedIn links)
+- [ ] Remove "About" from the header nav and the mobile menu in `templates/base.html`
+- [ ] `/about/` (bookmarks, search results): 301 → `/` in `vercel.json`
+- [ ] Social links are not moved elsewhere unless the owner asks (default: dropped);
+      drop the LinkedIn `[link_checker] skip_prefixes` entry if nothing links there
+- [ ] Nav after M8 = Photos (+ video page from M7); verify header, mobile menu,
+      and footer still balance with fewer items
 
 ## Shader notes
 
@@ -198,7 +278,7 @@ fragColor = vec4(mix(dark, light, gray), 1.0);
 
 - Serif font: Newsreader vs Fraunces vs licensing Plantin.
 - Zola vs Eleventy.
-- Domain: keep simonas-dev.vercel.app or buy simonas.dev.
+- ~~Domain~~ → **simonas.dev** (already Vercel production domain; `base_url` set).
 - Which projects to feature on the home page (digital-sun, quies, strip-tester?).
 
 ## References
