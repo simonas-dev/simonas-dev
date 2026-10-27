@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-night">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="dark">
   <meta name="htmx-config" content='{"refreshOnHistoryMiss":true,"includeIndicatorStyles":false}'>
   <title>{% block title %}{{ config.title }}{% endblock title %}</title>
   {#- No site-wide description (owner: the site does not describe who he is).
@@ -27,7 +27,6 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <script>(function(){try{var t=localStorage.getItem('theme')}catch(e){}if(t=='night'||t!='day'&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('theme-night')})()</script>
   {#- Video will autoplay (same gates as videoAllowed in site.js): fade it in from
       black instead of crossfading over the poster, whose colour path differs. -#}
   <script>(function(){var c=navigator.connection;if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(c&&(c.saveData||/2g/.test(c.effectiveType||''))))document.documentElement.classList.add('video-ok')})()</script>
@@ -61,7 +60,6 @@
   </div>
   <footer class="chrome">
     <small>&copy; {{ now() | date(format="%Y") }} Simonas Sankauskas · <a href="/feed.xml" hx-boost="false">RSS</a></small>
-    <button type="button" class="theme-toggle" disabled aria-label="Theme: Auto">Auto</button>
   </footer>
 </body>
 </html>
