@@ -161,6 +161,45 @@
     if (playing && playing.catch) playing.catch(function () { /* blocked: the poster stays */ });
   }
 
+  // Warm the HTTP cache with the file the Digital Sun page will play, so the
+  // link opens straight into the loop. Picks like the browser does: the first
+  // <source> in #sun-sources (home only) whose media matches and type plays.
+  // Once per page view, on idle, or sooner on hover/focus of the link; same
+  // gates as playback (reduced motion, Save-Data, 2g fetch nothing). The body
+  // is streamed and dropped, so nothing is held in memory.
+  var sunWarmed = false;
+  function warmSunVideo() {
+    var list = document.getElementById('sun-sources');
+    if (sunWarmed || !list || !window.fetch || document.hidden || !videoAllowed()) return;
+    var probe = document.createElement('video');
+    var sources = list.content.querySelectorAll('source');
+    for (var i = 0; i < sources.length; i++) {
+      var media = sources[i].getAttribute('media');
+      if (media && !matchMedia(media).matches) continue;
+      if (!probe.canPlayType(sources[i].getAttribute('type') || '')) continue;
+      sunWarmed = true;
+      fetch(sources[i].src, { priority: 'low', credentials: 'same-origin' }).then(function (response) {
+        if (!response.ok || !response.body) return;
+        var reader = response.body.getReader();
+        (function drain() { reader.read().then(function (r) { if (!r.done) drain(); }, function () {}); })();
+      }, function () { sunWarmed = false; });
+      return;
+    }
+  }
+
+  function scheduleSunWarm() {
+    if (sunWarmed || !document.getElementById('sun-sources')) return;
+    if (window.requestIdleCallback) requestIdleCallback(warmSunVideo, { timeout: 4000 });
+    else setTimeout(warmSunVideo, 2000);
+  }
+
+  ['pointerenter', 'focusin', 'touchstart'].forEach(function (type) {
+    document.addEventListener(type, function (event) {
+      var link = event.target.closest && event.target.closest('a[href="/digital-sun/"]');
+      if (link) warmSunVideo();
+    }, { capture: true, passive: true });
+  });
+
   // Media events don't bubble; capture them. The video fades in over the poster.
   document.addEventListener('playing', function (event) {
     if (event.target === video) video.classList.add('playing');
@@ -237,6 +276,7 @@
   function afterPageChange() {
     oceanMode(true);
     videoMode();
+    scheduleSunWarm();
     markCurrentNav();
     closeMenu();
   }
@@ -351,4 +391,5 @@
   renderToggles();
   oceanMode(false);
   videoMode();
+  scheduleSunWarm();
 })();

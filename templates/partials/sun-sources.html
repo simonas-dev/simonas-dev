@@ -1,0 +1,11 @@
+{#- Full-page Digital Sun sources, in preference order (first match wins: media
+    query + playable type). Used by video.html, and by index.html as a <template>
+    so site.js can pick the same file and warm the cache before the link is clicked. -#}
+    <source media="(orientation: portrait) and (min-width: 700px) and (min-resolution: 1.5dppx)" src="/video/video-portrait-2160.av1.mp4" type='video/mp4; codecs="av01.0.12M.10"'>
+    <source media="(orientation: portrait) and (min-width: 700px) and (min-resolution: 1.5dppx)" src="/video/video-portrait-2160.hevc.mp4" type='video/mp4; codecs="hvc1.2.4.L150.B0"'>
+    <source media="(orientation: portrait)" src="/video/video-portrait-1080.av1.mp4" type='video/mp4; codecs="av01.0.08M.10"'>
+    <source media="(orientation: portrait)" src="/video/video-portrait-1080.h264.mp4" type='video/mp4; codecs="avc1.640033"'>
+    <source media="(min-width: 1600px), (min-width: 1000px) and (min-resolution: 2dppx)" src="/video/video-2160.av1.mp4" type='video/mp4; codecs="av01.0.12M.10"'>
+    <source media="(min-width: 1600px), (min-width: 1000px) and (min-resolution: 2dppx)" src="/video/video-2160.hevc.mp4" type='video/mp4; codecs="hvc1.2.4.L150.B0"'>
+    <source src="/video/video-1080.av1.mp4" type='video/mp4; codecs="av01.0.08M.10"'>
+    <source src="/video/video-1080.h264.mp4" type='video/mp4; codecs="avc1.640033"'>
