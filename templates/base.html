@@ -41,7 +41,7 @@
 <body hx-boost="true" hx-select="div.page" hx-target="div.page" hx-swap="outerHTML swap:220ms show:window:top">
   <a class="skip-link" href="#main">Skip to content</a>
   <canvas id="ocean" aria-hidden="true"></canvas>
-  <a class="logo" href="/">{{ config.title }}</a>
+  <a class="logo" href="/" aria-label="{{ config.title }} — home">~/</a>
   {%- set path = current_path | default(value="") %}
   <header class="chrome">
     <nav class="nav-inline" aria-label="Main">
