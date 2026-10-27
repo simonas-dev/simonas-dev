@@ -184,6 +184,25 @@ a {
   pointer-events: auto;
 }
 
+/* Home <-> Digital Sun: slow whole-page crossfade (site.js, View Transitions).
+   The per-page swap fade is off meanwhile, or the new page would fade twice. */
+:root {
+  --sun-crossfade: 1400ms;
+}
+
+html.sun-crossfade::view-transition-old(root),
+html.sun-crossfade::view-transition-new(root) {
+  animation-duration: var(--sun-crossfade);
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); /* symmetric: 50/50 at the midpoint */
+}
+
+html.sun-crossfade .page.htmx-swapping #main > *,
+html.sun-crossfade .page.htmx-added #main > * {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 /* htmx page swap: old content fades out during the 220ms swap delay, new
    content fades in once htmx drops .htmx-added at settle. Animated below
    .page, because opacity/transform on an ancestor of .content-surface would

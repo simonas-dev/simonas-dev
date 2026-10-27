@@ -285,6 +285,7 @@
   }
 
   function afterPageChange() {
+    lastPath = location.pathname;
     oceanMode(true);
     videoMode();
     scheduleSunWarm();
@@ -336,8 +337,30 @@
 
   // Non-2xx responses are left to htmx:responseError. Successful responses must
   // be one of our pages (alias redirect pages and other HTML lack div.page).
+  // Home <-> Digital Sun: a slow whole-page crossfade (View Transitions) instead
+  // of the quick fade-out/fade-in, so the sea and the black video page overlap.
+  // Applies to link navs and back/forward; elsewhere, and without View
+  // Transitions support, the normal swap fade stays. html.sun-crossfade turns
+  // off the per-page fade (it would fade twice) and sets the duration.
+  var SUN_PATH = '/digital-sun/';
+  var lastPath = location.pathname;
+  function sunCrossfade(toPath) {
+    var on = !!document.startViewTransition && (lastPath === SUN_PATH) !== (toPath === SUN_PATH);
+    root.classList.toggle('sun-crossfade', on);
+    return on;
+  }
+
+  document.addEventListener('htmx:historyCacheHit', function (event) {
+    if (sunCrossfade(location.pathname)) event.detail.swapSpec.transition = true;
+  });
+
   document.addEventListener('htmx:beforeSwap', function (event) {
     var detail = event.detail;
+    if (detail.shouldSwap && detail.xhr !== droppedXhr) {
+      var to = new URL(detail.xhr.responseURL || detail.pathInfo.requestPath, location.href).pathname;
+      // No swap delay: the old page must still be fully visible when it's snapshotted.
+      if (sunCrossfade(to)) detail.swapOverride = 'outerHTML transition:true show:window:top';
+    }
     if (detail.xhr === droppedXhr) {
       detail.shouldSwap = false;
       detail.isError = false;
@@ -397,7 +420,17 @@
     runQueuedNav();
   });
 
-  document.addEventListener('htmx:historyRestore', afterPageChange);
+  // A restore inside a view transition swaps a frame or more after this event
+  // (in the transition's update callback): wait for the new #main first.
+  document.addEventListener('htmx:historyRestore', function () {
+    if (!root.classList.contains('sun-crossfade')) return afterPageChange();
+    var before = document.getElementById('main');
+    var frames = 0;
+    (function check() {
+      if (document.getElementById('main') !== before || ++frames > 120) afterPageChange();
+      else requestAnimationFrame(check);
+    })();
+  });
 
   renderToggles();
   oceanMode(false);
