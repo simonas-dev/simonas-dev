@@ -344,9 +344,18 @@
   // off the per-page fade (it would fade twice) and sets the duration.
   var SUN_PATH = '/digital-sun/';
   var lastPath = location.pathname;
+  // Chrome snapshots the faint (5%) home video as solid black, so for the
+  // fade the home sky shows its poster instead (CSS); the class comes off
+  // once the crossfade has finished, bringing the live video back.
+  var crossfadeTimer = 0;
   function sunCrossfade(toPath) {
     var on = !!document.startViewTransition && (lastPath === SUN_PATH) !== (toPath === SUN_PATH);
+    clearTimeout(crossfadeTimer);
     root.classList.toggle('sun-crossfade', on);
+    if (on) {
+      var ms = parseFloat(getComputedStyle(root).getPropertyValue('--sun-crossfade')) || 1400;
+      crossfadeTimer = setTimeout(function () { root.classList.remove('sun-crossfade'); }, ms + 300);
+    }
     return on;
   }
 

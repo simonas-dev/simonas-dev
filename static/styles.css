@@ -196,6 +196,15 @@ html.sun-crossfade::view-transition-new(root) {
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); /* symmetric: 50/50 at the midpoint */
 }
 
+/* Chrome snapshots the 5% home video as opaque black: show its poster for the fade. */
+html.sun-crossfade .sky-video picture {
+  visibility: visible;
+}
+
+html.sun-crossfade .sky-video video {
+  visibility: hidden;
+}
+
 html.sun-crossfade .page.htmx-swapping #main > *,
 html.sun-crossfade .page.htmx-added #main > * {
   opacity: 1;
@@ -566,6 +575,10 @@ img {
   visibility: hidden;
 }
 
+/* Except while crossfading in from home: the incoming page must show the sun
+   from its first frame (the poster is cached from home), not black while the
+   video starts; the poster/video colour step then falls inside the blend. */
+html.sun-crossfade.video-ok .video-page .video-poster,
 .video-ok .video-failed .video-poster,
 .video-ok .sky-video.video-failed picture {
   visibility: visible;
