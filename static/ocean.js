@@ -9,9 +9,9 @@
   if (!canvas) return;
 
   var TIERS = [
-    { name: 'high', scale: 0.4, raymarch: 12, normal: 24 },
-    { name: 'med', scale: 0.375, raymarch: 10, normal: 16 },
-    { name: 'low', scale: 0.35, raymarch: 8, normal: 10 }
+    { name: 'high', scale: 0.4, raymarch: 12, normal: 16 },
+    { name: 'med', scale: 0.375, raymarch: 10, normal: 12 },
+    { name: 'low', scale: 0.35, raymarch: 8, normal: 8 }
   ];
   var MAX_BACKING_WIDTH = 1024;
   var NOISE_SCALE = 1.0;
@@ -28,8 +28,8 @@
   var TIER_STORAGE_KEY = 'ocean-tier';
   var STATIC_TIER = 'static';
   var UNIFORM_NAMES = ['iResolution', 'iTime', 'u_waveTime', 'u_grainTime', 'u_night', 'u_noiseScale'];
-  // Horizon / canvas height, from the ocean.frag.glsl camera.
-  var HORIZON = 0.5 + 0.75 * Math.tan(0.12);
+  // Horizon/canvas height = shader 0.5+0.5*CAMERA_FOCAL*tan(CAMERA_PITCH).
+  var HORIZON = 0.382;
 
   // site.js sets speed/res/fps and tweens night.
   var state = window.__ocean = { speed: 1, res: 1, fps: 0, resize: onResize, night: +root.classList.contains('theme-night'), tier: null };

@@ -13,36 +13,37 @@ uniform float u_noiseScale;
 
 #define MAX_WAVE_ITERS 36
 #define RAYMARCH_STEPS 64
-#define WATER_DEPTH 1.0
+#define WATER_DEPTH 0.75
 #define PI 3.14159265
 #define NIGHT_DIM 0.32
+#define PEAK 0.6          // crest sharpness: lower = rounder swell
 
 // Fixed camera. Screen horizon (ray.y == 0) sits at
 //   horizonFromBottom = 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH)
 // of the viewport height, independent of aspect ratio and camera height.
-const float CAMERA_HEIGHT = 1.5;  // above the mean water plane
-const float CAMERA_PITCH = 0.12;  // radians, downward
+const float CAMERA_HEIGHT = 1.25; // above the mean water plane
+const float CAMERA_PITCH = -0.1561; // radians, negative = looking up
 const float CAMERA_FOCAL = 1.5;   // focal length in half-viewport-heights
-const float CAMERA_DRIFT = 0.2;   // origin drift per unit of u_waveTime
-const float CAMERA_SWELL = 0.03;  // height swell amplitude (iTime)
+const float CAMERA_DRIFT = 0.08;  // origin drift per unit of u_waveTime
+const float CAMERA_SWELL = 0.015; // height swell amplitude (iTime)
 
 const vec3 SUN_DIR = vec3(0.0, 0.2588, 0.9659); // ~15 deg above horizon, ahead
 
 vec2 wavedx(vec2 p, vec2 d, float freq, float t) {
   float x = dot(d, p) * freq + t;
-  float wave = exp(sin(x) - 1.0);
-  return vec2(wave, -wave * cos(x));           // height, derivative
+  float wave = exp(PEAK * (sin(x) - 1.0));
+  return vec2(wave, -PEAK * wave * cos(x));    // height, derivative
 }
 
 float getwaves(vec2 p, int iters) {
-  float iter = 0.0, freq = 1.0, tw = 2.0, w = 1.0, sum = 0.0, sumw = 0.0;
+  float iter = 0.0, freq = 1.0, tw = 0.9, w = 1.0, sum = 0.0, sumw = 0.0;
   for (int i = 0; i < MAX_WAVE_ITERS; i++) {
     if (i >= iters) break;
     vec2 d = vec2(sin(iter), cos(iter));
     vec2 r = wavedx(p, d, freq, u_waveTime * tw);
-    p += d * r.y * w * 0.38;                     // drag
+    p += d * r.y * w * 0.2;                      // drag
     sum += r.x * w; sumw += w;
-    w *= 0.82; freq *= 1.18; tw *= 1.07; iter += 1232.399963;
+    w *= 0.76; freq *= 1.18; tw *= 1.07; iter += 1232.399963;
   }
   return sum / sumw;
 }
@@ -122,7 +123,10 @@ void main() {
     float dist = raymarchwater(origin, origin + ray * highHit, origin + ray * lowHit, WATER_DEPTH);
     vec3 hit = origin + ray * dist;
 
-    vec3 N = waterNormal(hit.xz, 0.01, WATER_DEPTH);
+    // Normal epsilon ~ pixel footprint on the water: grows with distance and, at
+    // grazing angles, by 1/|ray.y| (footprint stretches along the view ray).
+    float eps = 0.01 + dist * 3.0 / (CAMERA_FOCAL * iResolution.y * max(-ray.y, 0.03));
+    vec3 N = waterNormal(hit.xz, eps, WATER_DEPTH);
     N = mix(N, up, 0.8 * min(1.0, sqrt(dist * 0.01) * 1.1));
     float fresnel = 0.04 + 0.96 * pow(1.0 - max(0.0, dot(-N, ray)), 5.0);
     vec3 R = reflect(ray, N);
