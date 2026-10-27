@@ -1,6 +1,5 @@
 base_url = "https://simonas.dev"
 title = "Simonas Sankauskas"
-description = "Simonas Sankauskas — Senior Software Engineer, Android."
 
 compile_sass = false
 build_search_index = false

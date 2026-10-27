@@ -6,14 +6,19 @@
   <meta name="color-scheme" content="light">
   <meta name="htmx-config" content='{"refreshOnHistoryMiss":true,"includeIndicatorStyles":false}'>
   <title>{% block title %}{{ config.title }}{% endblock title %}</title>
-  <meta name="description" content="{% block description %}{{ config.description }}{% endblock description %}">
+  {#- No site-wide description (owner: the site does not describe who he is).
+      Only pages with their own `description` front matter emit one. -#}
+  {%- set description = "" %}{% if page and page.description %}{% set description = page.description %}{% endif %}
+  {%- if description %}
+  <meta name="description" content="{{ description }}">{% endif %}
   {% block robots %}{% endblock robots %}
   <link rel="alternate" type="application/rss+xml" title="{{ config.title }}" href="/feed.xml">
   {%- set og_title = config.title %}
   {%- if page and page.title %}{% set og_title = page.title %}{% elif section and section.title %}{% set og_title = section.title %}{% endif %}
   <meta property="og:type" content="website">
   <meta property="og:title" content="{{ og_title }}">
-  <meta property="og:description" content="{{ config.description }}">
+  {%- if description %}
+  <meta property="og:description" content="{{ description }}">{% endif %}
   <meta property="og:url" content="{{ current_url | default(value=config.base_url) }}">
   <meta property="og:image" content="{{ get_url(path='og.jpg') }}">
   <meta name="twitter:card" content="summary_large_image">

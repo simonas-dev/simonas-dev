@@ -12,7 +12,7 @@
           {{ config.base_url | escape_xml | safe }}
         {%- endif -%}
       </link>
-      <description>{{ config.description }}</description>
+      <description>{{ config.title }}</description>
       <generator>Zola</generator>
       <language>{{ lang }}</language>
       <atom:link href="{{ feed_url | safe }}" rel="self" type="application/rss+xml"/>
