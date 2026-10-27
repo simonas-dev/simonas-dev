@@ -344,8 +344,7 @@
   // off the per-page fade (it would fade twice) and sets the duration.
   var SUN_PATH = '/digital-sun/';
   var lastPath = location.pathname;
-  // The class comes off once the crossfade has finished (it also hides the
-  // faint sky poster for the fade, see styles.css).
+  // The class comes off once the crossfade has finished.
   var crossfadeTimer = 0;
   function sunCrossfade(toPath) {
     var on = !!document.startViewTransition && (lastPath === SUN_PATH) !== (toPath === SUN_PATH);

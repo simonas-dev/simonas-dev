@@ -196,20 +196,17 @@ html.sun-crossfade::view-transition-new(root) {
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); /* symmetric: 50/50 at the midpoint */
 }
 
-/* Chrome bug: any image painted inside the faint, masked .sky-video layer
-   leaves a transparent hole in the view-transition snapshot (the sky drops to
-   black at the start of the fade). Video is fine. So the sky poster is never
-   rendered while the video plays (display: none below), and in poster-only
-   mode it sits out the crossfade. */
-html.sun-crossfade .sky-video picture {
-  display: none;
-}
-
 html.sun-crossfade .page.htmx-swapping #main > *,
 html.sun-crossfade .page.htmx-added #main > * {
   opacity: 1;
   transform: none;
   transition: none;
+}
+
+/* ...but the faint sky layer keeps its own opacity (else it flashes to 100%). */
+html.sun-crossfade .page.htmx-swapping #main > .sky-video,
+html.sun-crossfade .page.htmx-added #main > .sky-video {
+  opacity: var(--sky-video-opacity);
 }
 
 /* htmx page swap: old content fades out during the 220ms swap delay, new
