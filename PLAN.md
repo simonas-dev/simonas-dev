@@ -81,8 +81,8 @@ simonas-dev/
 - [x] Teardown of the Nextra site (see "Starting point"), move kept assets to `static/`
 - [x] `zola init`, `.gitignore`, `README.md`, `vercel.json`
 - [x] `base.html` with the layer stack: canvas (z 0) → logo (z 10) → page (z 100) → chrome (z 200)
-- [ ] Vercel builds from `main` with Zola; confirm `simonas-dev.vercel.app` serves the new site
-      _(Preview verified 2026-10-27: Vercel builds the Zola site from `rewrite` (musl binary, Node 24.x setting); remaining: merge to `main` + production deploy to simonas.dev, owner's call.)_
+- [x] Vercel builds from `main` with Zola; confirm `simonas-dev.vercel.app` serves the new site
+      _(Preview verified 2026-10-27: Vercel builds the Zola site from `rewrite` (musl binary, Node 24.x setting); went live 2026-10-28: `main` fast-forwarded to `6b03133`, production deploy `simonas-6xxhhlf14` on simonas.dev. Rollback: `vercel rollback simonas-954yjwi4u-simonas-dev.vercel.app` (old Nextra site).)_
 - [x] Migrated content: home, about, photos, ballistic-wizard post, `/feed.xml`
 
 ### M1 — Ocean shader (1–2 days)
