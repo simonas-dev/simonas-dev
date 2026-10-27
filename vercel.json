@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "curl -sSfL https://github.com/getzola/zola/releases/download/v0.23.6/zola-v0.23.6-x86_64-unknown-linux-gnu.tar.gz | tar -xz",
+  "buildCommand": "./zola build",
+  "outputDirectory": "public",
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/posts/wizard", "destination": "/posts/ballistic-wizard/", "statusCode": 301 },
+    { "source": "/tags/:path*", "destination": "/posts/", "statusCode": 301 }
+  ]
+}

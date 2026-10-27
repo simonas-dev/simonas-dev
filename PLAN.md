@@ -79,11 +79,11 @@ simonas-dev/
 ## Milestones
 
 ### M0 — Scaffold (½ day)
-- [ ] Teardown of the Nextra site (see "Starting point"), move kept assets to `static/`
-- [ ] `zola init`, `.gitignore`, `README.md`, `vercel.json`
-- [ ] `base.html` with the layer stack: canvas (z 0) → logo (z 10) → page (z 100) → chrome (z 200)
+- [x] Teardown of the Nextra site (see "Starting point"), move kept assets to `static/`
+- [x] `zola init`, `.gitignore`, `README.md`, `vercel.json`
+- [x] `base.html` with the layer stack: canvas (z 0) → logo (z 10) → page (z 100) → chrome (z 200)
 - [ ] Vercel builds from `main` with Zola; confirm `simonas-dev.vercel.app` serves the new site
-- [ ] Migrated content: home, about, photos, ballistic-wizard post, `/feed.xml`
+- [x] Migrated content: home, about, photos, ballistic-wizard post, `/feed.xml`
 
 ### M1 — Ocean shader (1–2 days)
 - [ ] Full-screen quad + fragment shader, render at 0.35–0.4× resolution, upscale with `image-rendering: auto`

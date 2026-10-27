@@ -1,12 +1,10 @@
 # --- Build output -------------------------------------------------------------
 # Zola writes the built site to public/. Source assets live in static/.
-# (Legacy Nextra files under public/ stay tracked until M0 moves them.)
 /public/
 
 # --- Dependencies / tooling caches ------------------------------------------
 node_modules/
 .cache/
-# Legacy Next.js build dirs (removed in M0)
 /.next/
 /out/
 

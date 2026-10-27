@@ -10,5 +10,9 @@ Advisors treat entries here as the contract. Newest last.
 | 2026-10-27 | setup | Execution mode | Milestone by milestone on autopilot: commit per milestone on `rewrite`, never push, never `--prod` deploy | Owner |
 | 2026-10-27 | setup | What gets committed | Follow `.gitignore`: build output (`public/`), `.vercel/`, env files, `.pi/*` runtime state are ignored; `.pi/agents`, `.pi/prompts`, `.council/`, `AGENTS.md`, `PLAN.md` are tracked | Owner |
 | | | Serif font (Newsreader / Fraunces / Plantin) | _open_ (M2) | |
-| | | Domain (vercel.app / simonas.dev) | _open_ | |
+| 2026-10-27 | M0 | Domain / `base_url` | **https://simonas-dev.vercel.app** for now; revisit if simonas.dev is bought | autopilot (no domain owned; keeps feed URL stable) |
 | | | Featured projects on home | _open_ | |
+| 2026-10-27 | M0 | Vercel deploy in M0 | Write `vercel.json` only; preview deploy deferred (CLI logged out, project not linked); prod/main untouched | autopilot (credentials needed) |
+| 2026-10-27 | M0 | Photo originals | Resize in place to 2400px; originals kept only in git history | autopilot (council unanimous) |
+| 2026-10-27 | M0 | Home vs About | `/` = minimal home stub; About content at `/about/` | autopilot (council rec, PLAN layout) |
+| 2026-10-27 | M0 | Old URLs / feed | `/posts/wizard` alias + vercel 301; `/tags/*` 301 → `/posts/`; `/feed.xml` stays RSS 2.0 | autopilot (council rec) |

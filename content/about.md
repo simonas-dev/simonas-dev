@@ -1,0 +1,15 @@
++++
+title = "About"
++++
+
+# Simonas Sankauskas
+
+I am a Senior Software Engineer with 7 years of experience working on Android apps.
+
+---
+
+Reach me at:
+
+- <https://github.com/simonas-dev>
+- <https://instagram.com/swimonas>
+- <https://www.linkedin.com/in/simonas-sankauskas/>

@@ -1,0 +1,15 @@
+base_url = "https://simonas-dev.vercel.app"
+title = "Simonas Sankauskas"
+description = "Simonas Sankauskas — Senior Software Engineer, Android."
+
+compile_sass = false
+build_search_index = false
+
+generate_feeds = true
+feed_filenames = ["feed.xml"]
+
+[markdown]
+
+[link_checker]
+# LinkedIn answers bots with HTTP 999.
+skip_prefixes = ["https://www.linkedin.com/"]
