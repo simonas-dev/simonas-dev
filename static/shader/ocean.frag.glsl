@@ -28,6 +28,16 @@ const float CAMERA_FOCAL = 1.5;   // focal length in half-viewport-heights
 const float CAMERA_DRIFT = 0.08;  // origin drift per unit of u_waveTime
 const float CAMERA_SWELL = 0.015; // height swell amplitude (iTime)
 
+// Sunset glimmer: a low warm sun just above the horizon, straight ahead (in
+// line with the Digital Sun orb in the sky). Wave facets that reflect it get a
+// faint red sparkle; together they form the glitter path. Added after the
+// greyscale grain pass, so the rest of the scene stays monochrome.
+const vec3 GLIMMER_DIR = vec3(0.0, 0.0349, 0.9994); // ~2 deg above the horizon
+const vec3 GLIMMER_COLOR = vec3(0.60, 0.11, 0.04);
+const float GLIMMER_SPARKLE = 0.16; // glints
+const float GLIMMER_SHEEN = 0.011;  // soft path under them
+const float GLIMMER_WIDTH = 4.0;    // >1 widens the path sideways (not in depth)
+
 
 vec2 wavedx(vec2 p, vec2 d, float freq, float t) {
   float x = dot(d, p) * freq + t;
@@ -134,7 +144,7 @@ float gaussian(float z, float mu, float sigma) {
   return exp(-0.5 * t * t) / (sigma * sqrt(2.0 * PI));
 }
 
-vec3 post(vec3 color, vec2 uv) {
+vec3 post(vec3 color, vec2 uv, float glimmer) {
   float gray = dot(color, vec3(0.299, 0.587, 0.114));
   // Night: dim the scene so light ink (#e8e6e1) stays readable on the sky.
   gray *= mix(1.0, NIGHT_DIM, u_night);
@@ -143,12 +153,13 @@ vec3 post(vec3 color, vec2 uv) {
   gray = clamp(gray + n * (1.0 - gray) * mix(0.4, 0.065, u_night), 0.0, 1.0);
   vec3 dark  = mix(vec3(0.62, 0.615, 0.60), vec3(0.05), u_night);
   vec3 light = mix(vec3(0.980, 0.976, 0.965), vec3(1.00), u_night);
-  return mix(dark, light, gray);
+  return mix(dark, light, gray) + GLIMMER_COLOR * glimmer;
 }
 
 void main() {
   vec3 ray = cameraRay(gl_FragCoord.xy);
   vec3 color;
+  float glimmer = 0.0;
   if (ray.y >= -1e-4) { // near-horizon rays as sky: plane hits there divide by ~0
     color = sky(ray) + stars(ray);
   } else {
@@ -172,6 +183,10 @@ void main() {
     vec3 scattering = vec3(0.0293, 0.0698, 0.1717) * 0.1
                     * (0.2 + (hit.y + WATER_DEPTH) / WATER_DEPTH);
     color = fresnel * sky(R) + scattering;
+    float g = max(dot(normalize(vec3(R.x / GLIMMER_WIDTH, R.yz)), GLIMMER_DIR), 0.0);
+    glimmer = GLIMMER_SPARKLE * pow(g, 300.0) + GLIMMER_SHEEN * pow(g, 16.0);
+    // Distant water is near mirror-flat: soften there so it doesn't fuse into a bar.
+    glimmer *= mix(0.35, 1.0, smoothstep(0.004, 0.05, -ray.y));
   }
-  gl_FragColor = vec4(post(color, gl_FragCoord.xy), 1.0);
+  gl_FragColor = vec4(post(color, gl_FragCoord.xy, glimmer), 1.0);
 }

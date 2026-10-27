@@ -620,34 +620,44 @@ body:has(.video-page) .chrome:has(details[open]) {
   opacity: 1;
 }
 
-/* Digital Sun, faint in the home sky: the whole layer is 5% opaque above the
+/* Digital Sun, faint in the home sky: the whole layer is 10% opaque above the
    sea line and fully transparent below it. Same box as #ocean (fixed, inset 0),
    so the shader horizon is a fixed fraction of this box too: 38.2% from the
    bottom (CAMERA_PITCH in ocean.frag.glsl; change both together). A short
-   feather above the line keeps the cut from reading as an edge. */
+   feather above the line keeps the cut from reading as an edge.
+   A second, round mask keeps only the orb and its glow ring (radius ~0.21 of
+   the video frame's height) and drops the red square frame (~0.40). Sizes
+   follow the frame's on-screen height under object-fit: cover; the orb is
+   centred by --video-shift. */
 .sky-video {
-  --sky-video-opacity: 0.05;
+  --sky-video-opacity: 0.1;
   --sky-horizon: 38.2%;
   --sky-video-feather: 2%;
   --video-shift: 3%;
+  --frame-h: max(100vh, 100vw * 1.06 * 9 / 16); /* 16:9 frame, widened by 2 × shift */
+  --orb-mask: radial-gradient(circle at 50% 50%,
+    #000 calc(var(--frame-h) * 0.22),
+    transparent calc(var(--frame-h) * 0.32));
+  --horizon-mask: linear-gradient(to top,
+    transparent var(--sky-horizon),
+    #000 calc(var(--sky-horizon) + var(--sky-video-feather)));
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
   opacity: var(--sky-video-opacity);
-  -webkit-mask-image: linear-gradient(to top,
-    transparent var(--sky-horizon),
-    #000 calc(var(--sky-horizon) + var(--sky-video-feather)));
-  mask-image: linear-gradient(to top,
-    transparent var(--sky-horizon),
-    #000 calc(var(--sky-horizon) + var(--sky-video-feather)));
+  -webkit-mask-image: var(--horizon-mask), var(--orb-mask);
+  -webkit-mask-composite: source-in;
+  mask-image: var(--horizon-mask), var(--orb-mask);
+  mask-composite: intersect;
 }
 
 /* Matches the portrait encodes' breakpoint in index.html. */
 @media (orientation: portrait) {
   .sky-video {
     --video-shift: -1.5%;
+    --frame-h: max(100vh, 100vw * 1.03 * 5 / 4); /* 4:5 portrait encodes */
   }
 }
 

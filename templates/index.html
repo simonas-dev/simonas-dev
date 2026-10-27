@@ -2,10 +2,10 @@
 
 {% block content %}
 <h1 class="visually-hidden">{{ config.title }}</h1>
-{#- Digital Sun, faint in the sky: 5% opacity above the horizon, none below
+{#- Digital Sun, faint in the sky: 10% opacity above the horizon, none below
     (mask follows --scene-horizon-from-bottom). site.js starts playback
     (skipped under reduced motion / Save-Data); the <picture> is the poster.
-    1080 only: at 5% opacity the 4K tier is invisible bandwidth. -#}
+    1080 only: at 10% opacity the 4K tier is invisible bandwidth. -#}
 <div class="sky-video" aria-hidden="true">
   <picture>
     <source media="(orientation: portrait)" type="image/avif" srcset="/video/poster-portrait.avif">
