@@ -1,0 +1,10 @@
+# Only the Zola sources are needed to build; never upload agent state or notes.
+.pi
+.council
+.vercel
+public
+node_modules
+*.mov
+*.mkv
+PLAN.md
+AGENTS.md
