@@ -51,13 +51,14 @@ simonas-dev/
   config.toml            # Zola config
   content/
     _index.md            # home
-    photos.md            # (about.md removed in M8)
+    digital-sun.md       # video page (photos.md, about.md removed)
     posts/
       _index.md          # (ballistic-wizard.md removed in M8)
   templates/
     base.html            # <head>, canvas, header, footer, scripts
     index.html           # home (ocean only, hidden h1)
-    page.html            # photos / projects
+    page.html            # generic content page
+    video.html           # Digital Sun
     section.html         # posts list
     post.html            # single post
   static/
@@ -180,26 +181,28 @@ stereo AAC). The master never enters git; add `*.mov` to `.gitignore`.
 > ≤ 2 MB target is superseded for the 4K tier (owner: preserve original quality).
 > Phones never receive 4K. Re-encode only via that folder's `encode.sh`.
 
-- [ ] Encode with ffmpeg into `static/video/`: drop audio; pick a 10–20 s span and
+- [x] Encode with ffmpeg into `static/video/`: drop audio; pick a 10–20 s span and
       crossfade end→start into a seamless loop; light encode-time grain to mask
       banding in dark gradients; `+faststart`
-- [ ] Variants: AV1 10-bit (primary) + H.264 (fallback); 1920×1080 landscape and a
+- [x] Variants: AV1 10-bit (primary) + H.264 (fallback); 1920×1080 landscape and a
       portrait crop centred on the orb (~1080×1350) via `<source media>`; target
       ≤ 2 MB per file
-- [ ] Poster frame as AVIF + WebP (~30 KB), shown instantly and as the fallback
-- [ ] Page `content/<slug>.md` (default slug `digital-sun`, title TBD) + `templates/video.html`:
+- [x] Poster frame as AVIF + WebP (~30 KB), shown instantly and as the fallback
+- [x] Page `content/<slug>.md` (default slug `digital-sun`, title TBD) + `templates/video.html`:
       `<video autoplay muted loop playsinline disablepictureinpicture
       disableremoteplayback aria-hidden="true">`, no `controls`, `object-fit: cover`
       full viewport on black
-- [ ] Hide the iOS Low Power Mode start-playback overlay; poster stays instead
-- [ ] Chrome dims (low opacity, full on hover/focus); optional small mono caption
+- [x] Hide the iOS Low Power Mode start-playback overlay; poster stays instead
+      _(CSS + JS-gated fade shipped; real-device LPM check deferred to owner.)_
+- [x] Chrome dims (low opacity, full on hover/focus); optional small mono caption
       (title / year / place) matching photo captions
-- [ ] Ocean shader pauses while this page is shown; resumes on navigation away
+- [x] Ocean shader pauses while this page is shown; resumes on navigation away
       (works with htmx `div.page` swaps)
-- [ ] `prefers-reduced-motion`, Save-Data / slow connection: poster only, no autoplay
-- [ ] Pause on `visibilitychange`; video element is removed with the page on
+- [x] `prefers-reduced-motion`, Save-Data / slow connection: poster only, no autoplay
+- [x] Pause on `visibilitychange`; video element is removed with the page on
       htmx navigation so it stops decoding
-- [ ] Linked from Photos (and/or Projects/nav — owner decision); excluded from the feed
+- [x] Linked from Photos (and/or Projects/nav — owner decision); excluded from the feed
+      _(Header nav + menu link "Digital Sun"; Photos page removed by owner post-M7.)_
 
 ### M8 — Content edits (½ day)
 

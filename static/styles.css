@@ -500,18 +500,100 @@ img {
   margin: 0.25em 0 0;
 }
 
-/* Photos reach the panel's inline edges (not the viewport). */
-.content-surface .bleed {
-  margin: 0 calc(-1 * var(--surface-pad)) var(--surface-pad);
+
+/* Video page: full-viewport loop on black over its poster; site.js starts
+   playback and pauses the ocean. Light chrome in both themes, dimmed until
+   hovered or focused. */
+.video-page {
+  position: fixed;
+  inset: 0;
+  background: #000;
 }
 
-.content-surface .bleed:last-child {
-  margin-bottom: 0;
+/* Opacity-only swap fade: a transformed ancestor would break position: fixed. */
+.page.htmx-swapping #main > .video-page,
+.page.htmx-added #main > .video-page {
+  transform: none;
 }
 
-.bleed img {
+/* Frame centre is shifted by --video-shift (positive = right, negative =
+   left) to centre the lamp, and widened by twice |shift| so it still covers
+   the viewport: one edge sits on the viewport edge, the other overflows. */
+.video-page {
+  --video-shift: 3%;
+}
+
+/* Matches the portrait encodes' breakpoint in video.html. */
+@media (orientation: portrait) {
+  .video-page {
+    --video-shift: -1.5%;
+  }
+}
+
+.video-poster img,
+.video-page video {
+  position: fixed;
+  inset: 0 auto 0 min(0%, 2 * var(--video-shift));
   display: block;
-  width: 100%;
+  width: calc(100% + 2 * max(var(--video-shift), -1 * var(--video-shift)));
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-page video {
+  opacity: 0;
+  transition: opacity 900ms var(--ease);
+}
+
+.video-page video.playing {
+  opacity: 1;
+}
+
+/* iOS Low Power Mode: hide the start-playback overlay; the poster stays. */
+.video-page video::-webkit-media-controls,
+.video-page video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
+.video-caption {
+  position: fixed;
+  left: var(--frame-inline);
+  bottom: calc(var(--frame-block) + var(--chrome-line) + 0.5rem);
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
+  font-weight: 400;
+  line-height: var(--chrome-line);
+}
+
+body:has(.video-page) {
+  --paper: #1a1a1a;
+  --ink: #e8e6e1;
+  --paper-texture: url("/paper-dark.png");
+  color-scheme: dark;
+  background: #000;
+}
+
+body:has(.video-page) footer.chrome {
+  background: none;
+}
+
+body:has(.video-page) .logo {
+  z-index: calc(var(--z-page) + 1);
+}
+
+body:has(.video-page) :is(.logo, .chrome, .video-caption) {
+  opacity: 0.55;
+  text-shadow: 0 0 0.75rem #000;
+  transition: opacity 220ms var(--ease);
+}
+
+body:has(.video-page) :is(.logo, .chrome, .video-caption):is(:hover, :focus-within),
+body:has(.video-page) .chrome:has(details[open]) {
+  opacity: 1;
 }
 
 :focus-visible {

@@ -1,7 +1,8 @@
 // Theme toggle: auto (follow OS) → night → day. Stored as localStorage
 // `theme` = 'night' | 'day' (absent = auto); the inline head script applies it
 // before first paint. Here: clicks, OS changes in auto, and the u_night tween.
-// Also sets the ocean's content-page mode (oceanMode) and wires htmx page swaps.
+// Also sets the ocean's content-page mode (oceanMode), plays the video page
+// (videoMode) and wires htmx page swaps.
 (function () {
   'use strict';
   var STORAGE_KEY = 'theme';
@@ -101,14 +102,18 @@
     mode = readMode();
     renderToggles();
     applyTheme();
+    videoMode();
   });
 
   // Content pages calm the ocean behind the panel: slow waves, half resolution,
-  // 15 fps. Reduced motion slows the waves further. Re-callable when the page
-  // content changes; `animate` eases the speed change (page swaps).
+  // 15 fps. Reduced motion slows the waves further. The video page covers the
+  // ocean, so it stops rendering there. Re-callable when the page content
+  // changes; `animate` eases the speed change (page swaps).
   function oceanMode(animate) {
     var ocean = window.__ocean;
     if (!ocean) return;
+    ocean.paused = !!document.querySelector('.video-page');
+    if (ocean.wake) ocean.wake();
     var content = !!document.querySelector('.content-surface');
     var reduced = !!reduceQuery && reduceQuery.matches;
     tween('speed', (content ? 0.15 : 1) * (reduced ? REDUCED_SPEED : 1), animate && !reduced ? SPEED_TWEEN_MS : 0);
@@ -118,8 +123,52 @@
     ocean.resize();
   }
 
+  // Video page: a muted loop started from here, never by markup (no autoplay,
+  // preload="none"), so reduced motion and Save-Data / 2g fetch no video and
+  // keep the poster. Paused while the tab is hidden; released once swapped out.
+  var video = null; // the current page's .video-page video, once seen
+
+  function videoAllowed() {
+    var connection = navigator.connection;
+    return !(reduceQuery && reduceQuery.matches) &&
+      !(connection && (connection.saveData || /2g/.test(connection.effectiveType || '')));
+  }
+
+  function pauseVideo() {
+    if (!video) return;
+    video.pause();
+    video.classList.remove('playing');
+  }
+
+  // A swapped-out video keeps its decoder until collected; drop its media now.
+  function releaseDetachedVideo() {
+    if (!video || video.isConnected) return;
+    pauseVideo();
+    while (video.firstChild) video.removeChild(video.firstChild);
+    video.removeAttribute('src');
+    video.load();
+    video = null;
+  }
+
+  function videoMode() {
+    releaseDetachedVideo();
+    video = document.querySelector('.video-page video');
+    if (!video) return;
+    if (document.hidden || !videoAllowed()) return pauseVideo();
+    video.muted = true;
+    var playing = video.play();
+    if (playing && playing.catch) playing.catch(function () { /* blocked: the poster stays */ });
+  }
+
+  // Media events don't bubble; capture them. The video fades in over the poster.
+  document.addEventListener('playing', function (event) {
+    if (event.target === video) video.classList.add('playing');
+  }, true);
+
+  document.addEventListener('visibilitychange', videoMode);
+
   if (reduceQuery) {
-    var onMotionChange = function () { oceanMode(false); };
+    var onMotionChange = function () { oceanMode(false); videoMode(); };
     if (reduceQuery.addEventListener) reduceQuery.addEventListener('change', onMotionChange);
     else reduceQuery.addListener(onMotionChange);
   }
@@ -131,7 +180,7 @@
     var ocean = window.__ocean;
     var canvas = document.getElementById('ocean');
     if (event.button !== 0 || !ocean || !ocean.ripples || !canvas || !root.classList.contains('shader-ready') ||
-        (reduceQuery && reduceQuery.matches) || document.querySelector('.content-surface') ||
+        (reduceQuery && reduceQuery.matches) || document.querySelector('.content-surface, .video-page') ||
         (event.target.closest && event.target.closest('a, button, summary, details, input, header, footer, .content-surface'))) return;
     var rect = canvas.getBoundingClientRect();
     var x = event.clientX - rect.left;
@@ -186,6 +235,7 @@
 
   function afterPageChange() {
     oceanMode(true);
+    videoMode();
     markCurrentNav();
     closeMenu();
   }
@@ -250,7 +300,12 @@
       return;
     }
     if (detail.shouldSwap && detail.xhr === navXhr) navSwapPending = true;
+    if (detail.shouldSwap) pauseVideo();
   });
+
+  // Snapshots (link navs and back/forward) must not keep .playing: a restored
+  // copy would show the empty video over its poster until it plays.
+  document.addEventListener('htmx:beforeHistorySave', pauseVideo);
 
   // A response that won't swap (and isn't an error, which full-loads) ends the navigation.
   document.addEventListener('htmx:afterRequest', function (event) {
@@ -274,6 +329,7 @@
   // browser may never compute it before htmx drops the class at settle, and the
   // content pops in without the fade.
   document.addEventListener('htmx:afterSwap', function (event) {
+    releaseDetachedVideo();
     var content = event.detail.boosted && document.querySelector('#main > *');
     if (content) void getComputedStyle(content).opacity;
   });
@@ -293,4 +349,5 @@
 
   renderToggles();
   oceanMode(false);
+  videoMode();
 })();

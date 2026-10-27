@@ -5,6 +5,17 @@
   "buildCommand": "./zola build",
   "outputDirectory": "public",
   "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/video/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    }
+  ],
   "redirects": [
     {
       "source": "/posts/wizard",
@@ -33,6 +44,16 @@
     },
     {
       "source": "/about/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/photos",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/photos/",
       "destination": "/",
       "statusCode": 301
     },

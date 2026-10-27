@@ -30,8 +30,8 @@
   var UNIFORM_NAMES = ['iResolution', 'iTime', 'u_waveTime', 'u_grainTime', 'u_night', 'u_noiseScale'];
   // The 38.2% horizon lives in CAMERA_PITCH in ocean.frag.glsl.
 
-  // site.js sets speed/res/fps and tweens night.
-  var state = window.__ocean = { speed: 1, res: 1, fps: 0, resize: onResize, night: +root.classList.contains('theme-night'), tier: null };
+  // site.js sets speed/res/fps/paused and tweens night; wake() applies paused.
+  var state = window.__ocean = { speed: 1, res: 1, fps: 0, resize: onResize, night: +root.classList.contains('theme-night'), tier: null, wake: wake };
 
   var gl = null;
   var program = null;
@@ -212,6 +212,7 @@
 
   function frame(now) {
     rafId = 0;
+    if (state.paused) return;
     // -8 ms: 60 Hz gives 15 fps, not 12. Probe uncapped.
     if (probe || !state.fps || now - lastFrameTime > 1000 / state.fps - 8) {
       var delta = lastFrameTime ? now - lastFrameTime : 0;
@@ -237,7 +238,7 @@
 
   // Static tier has no loop; site.js redraws per tween tick.
   state.redraw = function () {
-    if (isStatic && program && !gl.isContextLost()) drawStatic();
+    if (isStatic && program && !state.paused && !gl.isContextLost()) drawStatic();
   };
 
   // site.js writes click ripples: (screen uv xy, state.wave at click, strength) x 10.
@@ -322,15 +323,17 @@
   });
   canvas.addEventListener('webglcontextrestored', init);
 
-  // Hidden tab: no frames. On return the gap must not count as a probe frame.
-  document.addEventListener('visibilitychange', function () {
-    if (document.hidden) return stopLoop();
+  // Hidden tab or paused: no frames. On return the gap must not count as a probe frame.
+  function wake() {
+    if (document.hidden || state.paused) return stopLoop();
+    if (isStatic) return state.redraw();
     if (started && program && !isStatic && !rafId && !gl.isContextLost()) {
       lastFrameTime = 0;
       if (probe) probe = { frames: 0, deltas: [], stepsDown: probe.stepsDown };
       rafId = requestAnimationFrame(frame);
     }
-  });
+  }
+  document.addEventListener('visibilitychange', wake);
 
   init();
 })();

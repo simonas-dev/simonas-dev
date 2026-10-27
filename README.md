@@ -17,7 +17,10 @@ zola check   # build + check external links
 
 Content lives in `content/` (Markdown), templates in `templates/`, and static
 assets (images, favicon, `styles.css`) in `static/`. The RSS feed is
-generated at `/feed.xml` from `templates/feed.xml`.
+generated at `/feed.xml` from `templates/feed.xml`. `static/video/` holds the
+pre-encoded loop and posters for `/digital-sun/`; they are produced outside
+the repo (`~/Projects/simonas-dev-video/encode.sh`), and video masters
+(`*.mov`, `*.mkv`) are never committed.
 
 ## Deploy
 

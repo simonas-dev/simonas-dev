@@ -98,7 +98,7 @@ the approved plan as the implementation request:
   architecture decision
 
 Validation the worker and reviewers should use where applicable: `zola build`,
-`zola check`, `zola serve` + curl of key URLs (`/`, `/photos/`, `/posts/`,
+`zola check`, `zola serve` + curl of key URLs (`/`, `/digital-sun/`, `/posts/`,
 `/feed.xml`, `/404.html`, old URLs: redirects in `vercel.json`), JS size of
 `static/*.js`.
 
