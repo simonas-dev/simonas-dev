@@ -19,6 +19,15 @@ body {
   height: 100%;
   z-index: var(--z-canvas);
   pointer-events: none;
+  /* Backing store is 0.35–0.4× of CSS size; let the browser smooth the upscale. */
+  image-rendering: auto;
+  opacity: 0;
+  transition: opacity 1000ms cubic-bezier(0.333333, 0, 0.666667, 1);
+}
+
+/* Set on <html> by ocean.js once a quality tier is settled and a frame drawn. */
+.shader-ready #ocean {
+  opacity: 1;
 }
 
 .logo {

@@ -86,12 +86,12 @@ simonas-dev/
 - [x] Migrated content: home, about, photos, ballistic-wizard post, `/feed.xml`
 
 ### M1 — Ocean shader (1–2 days)
-- [ ] Full-screen quad + fragment shader, render at 0.35–0.4× resolution, upscale with `image-rendering: auto`
-- [ ] Port ocean raymarcher: `getwaves` (summed `exp(sin(x)-1)` octaves), normal from finite differences, simple sky
-- [ ] Post pass: luminance → add gaussian film grain → remap to `mix(dark, light, gray)`
-- [ ] Uniforms: `iResolution`, `iTime`, `u_waveTime`, `u_grainTime`, `u_night`, `u_noiseScale`
-- [ ] Quality levels (low/med/high) chosen by DPI + a quick frame-time probe; fallback to a static paper background when WebGL is unavailable
-- [ ] Fade canvas in via `.shader-ready` class (opacity 0 → 1 over 1s)
+- [x] Full-screen quad + fragment shader, render at 0.35–0.4× resolution, upscale with `image-rendering: auto`
+- [x] Port ocean raymarcher: `getwaves` (summed `exp(sin(x)-1)` octaves), normal from finite differences, simple sky
+- [x] Post pass: luminance → add gaussian film grain → remap to `mix(dark, light, gray)`
+- [x] Uniforms: `iResolution`, `iTime`, `u_waveTime`, `u_grainTime`, `u_night`, `u_noiseScale`
+- [x] Quality levels (low/med/high) chosen by DPI + a quick frame-time probe; fallback to a static paper background when WebGL is unavailable (M1: flat `#faf9f6`; paper.png lands in M4)
+- [x] Fade canvas in via `.shader-ready` class (opacity 0 → 1 over 1s)
 
 ### M2 — Typography & chrome (1 day)
 - [ ] Load fonts with `preload` + `font-display: swap`
