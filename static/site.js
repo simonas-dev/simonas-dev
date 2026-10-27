@@ -11,8 +11,9 @@
   var root = document.documentElement;
   var darkQuery = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
   var mode = readMode();
-  var tweenId = 0;
-  var tweenTarget = -1;
+  var reduceQuery = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  var REDUCED_SPEED = 0.3; // wave speed factor under reduced motion; grain keeps its rate
+  var SPEED_TWEEN_MS = 600;
 
   function readMode() {
     var value = null;
@@ -37,23 +38,38 @@
   }
 
   // Smoothstep on linear time equals the CSS cubic-bezier(1/3, 0, 2/3, 1).
+  // Tweens a numeric __ocean field (night, speed); ms <= 0 sets it at once.
+  var tweens = {}; // field -> { id, target } while running
+  function tween(field, target, ms) {
+    var ocean = window.__ocean;
+    var running = tweens[field];
+    if (running && running.target === target) return; // already heading there
+    if (running) cancelAnimationFrame(running.id);
+    tweens[field] = null;
+    if (!ocean || ocean[field] === target) return;
+    var from = ocean[field];
+    // The static tier redraws on night changes only; speed has no frame to show.
+    var redraw = field === 'night' && ocean.redraw;
+    if (!(ms > 0)) {
+      ocean[field] = target;
+      if (redraw) redraw();
+      return;
+    }
+    var start = performance.now();
+    var current = tweens[field] = { target: target, id: 0 };
+    current.id = requestAnimationFrame(function step(now) {
+      var p = Math.max(0, Math.min(1, (now - start) / ms));
+      ocean[field] = p < 1 ? from + (target - from) * p * p * (3 - 2 * p) : target;
+      if (redraw) redraw();
+      if (p < 1) current.id = requestAnimationFrame(step);
+      else tweens[field] = null;
+    });
+  }
+
   function tweenNight(target) {
     var ocean = window.__ocean;
-    if (tweenId && tweenTarget === target) return; // already heading there
-    cancelAnimationFrame(tweenId);
-    tweenId = 0;
-    if (!ocean || ocean.night === target) return;
-    var from = ocean.night;
     // Like CSS reversed transitions, a partial distance takes a partial duration.
-    var duration = TWEEN_MS * Math.abs(target - from);
-    var start = performance.now();
-    tweenTarget = target;
-    tweenId = requestAnimationFrame(function step(now) {
-      var p = Math.max(0, Math.min(1, (now - start) / duration));
-      ocean.night = from + (target - from) * p * p * (3 - 2 * p);
-      if (ocean.redraw) ocean.redraw();
-      tweenId = p < 1 ? requestAnimationFrame(step) : 0;
-    });
+    tween('night', target, ocean ? TWEEN_MS * Math.abs(target - ocean.night) : 0);
   }
 
   function applyTheme() {
@@ -88,15 +104,49 @@
   });
 
   // Content pages calm the ocean behind the panel: slow waves, half resolution,
-  // 15 fps. Re-callable when the page content changes.
-  function oceanMode() {
+  // 15 fps. Reduced motion slows the waves further. Re-callable when the page
+  // content changes; `animate` eases the speed change (page swaps).
+  function oceanMode(animate) {
     var ocean = window.__ocean;
     if (!ocean) return;
     var content = !!document.querySelector('.content-surface');
-    ocean.speed = content ? 0.15 : 1;
+    var reduced = !!reduceQuery && reduceQuery.matches;
+    tween('speed', (content ? 0.15 : 1) * (reduced ? REDUCED_SPEED : 1), animate && !reduced ? SPEED_TWEEN_MS : 0);
     ocean.res = content ? 0.5 : 1;
     ocean.fps = content ? 15 : 0;
+    if (content && ocean.ripples) ocean.ripples.fill(0);
     ocean.resize();
+  }
+
+  if (reduceQuery) {
+    var onMotionChange = function () { oceanMode(false); };
+    if (reduceQuery.addEventListener) reduceQuery.addEventListener('change', onMotionChange);
+    else reduceQuery.addListener(onMotionChange);
+  }
+
+  // Click ripples on the home sea. The shader projects the point onto the water
+  // (clicks on the sky miss it); uv matches its cameraRay: y up, height = 2.
+  var rippleCount = 0;
+  document.addEventListener('pointerdown', function (event) {
+    var ocean = window.__ocean;
+    var canvas = document.getElementById('ocean');
+    if (event.button !== 0 || !ocean || !ocean.ripples || !canvas || !root.classList.contains('shader-ready') ||
+        (reduceQuery && reduceQuery.matches) || document.querySelector('.content-surface') ||
+        (event.target.closest && event.target.closest('a, button, summary, details, input, header, footer, .content-surface'))) return;
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    var i = (rippleCount++ % 10) * 4;
+    ocean.ripples.set([(2 * x - rect.width) / rect.height, (rect.height - 2 * y) / rect.height, ocean.wave || 0, 1], i);
+  });
+
+  // aria-current on the nav links (header sits outside the swapped div.page).
+  function markCurrentNav() {
+    var links = document.querySelectorAll('header.chrome nav a');
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].pathname === location.pathname) links[i].setAttribute('aria-current', 'page');
+      else links[i].removeAttribute('aria-current');
+    }
   }
 
   // htmx boosted navigation (attributes on <body>, history element div.page).
@@ -135,7 +185,8 @@
   }
 
   function afterPageChange() {
-    oceanMode();
+    oceanMode(true);
+    markCurrentNav();
     closeMenu();
   }
 
@@ -241,5 +292,5 @@
   document.addEventListener('htmx:historyRestore', afterPageChange);
 
   renderToggles();
-  oceanMode();
+  oceanMode(false);
 })();

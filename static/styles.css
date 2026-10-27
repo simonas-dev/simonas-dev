@@ -262,7 +262,8 @@ header.chrome a {
   text-decoration: none;
 }
 
-header.chrome a:hover {
+header.chrome a:hover,
+header.chrome a[aria-current="page"] {
   text-decoration: underline;
 }
 
@@ -441,6 +442,12 @@ img {
 
 .content-surface h1 {
   margin: 0 0 0.75em;
+}
+
+/* 404 page: mono, on the 11px pixel grid. */
+.content-surface .not-found {
+  font-family: var(--font-mono);
+  font-size: calc(var(--mono-size) * 4);
 }
 
 .content-surface h2 {

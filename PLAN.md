@@ -155,13 +155,13 @@ Composition: golden-ratio split, with the sky taking the larger part.
       check anything positioned against the horizon (header scrim, footer fade,
       sun glow, content surfaces) on desktop and mobile
 
-- [ ] Click ripples: project pointer onto the water plane, push to `u_ripples[10]`
-- [ ] Logo drawn into the shader as a texture so waves pass "through" it
-- [ ] Stars at night (hashed grid), sun/moon glow
-- [ ] `prefers-reduced-motion`: slow waves, keep grain
-- [ ] Pause rendering when tab is hidden (`visibilitychange`)
-- [ ] OG image, favicons (light + dark), 404 page
-- [ ] Lighthouse pass; target < 150 KB JS total
+- [x] Click ripples: project pointer onto the water plane, push to `u_ripples[10]`
+- [ ] Logo drawn into the shader as a texture so waves pass "through" it (deferred: superseded by the HTML mono wordmark, see decisions.md)
+- [x] Stars at night (hashed grid), sun/moon glow
+- [x] `prefers-reduced-motion`: slow waves, keep grain
+- [x] Pause rendering when tab is hidden (`visibilitychange`)
+- [x] OG image, favicons (light + dark), 404 page
+- [x] Lighthouse pass; target < 150 KB JS total
 
 ### M7 — Video page (½ day)
 

@@ -8,7 +8,17 @@
   <title>{% block title %}{{ config.title }}{% endblock title %}</title>
   <meta name="description" content="{% block description %}{{ config.description }}{% endblock description %}">
   <link rel="alternate" type="application/rss+xml" title="{{ config.title }}" href="/feed.xml">
-  <link rel="icon" href="/favicon.ico">
+  {%- set og_title = config.title %}
+  {%- if page and page.title %}{% set og_title = page.title %}{% elif section and section.title %}{% set og_title = section.title %}{% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ og_title }}">
+  <meta property="og:description" content="{{ config.description }}">
+  <meta property="og:url" content="{{ current_url | default(value=config.base_url) }}">
+  <meta property="og:image" content="{{ get_url(path='og.jpg') }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/fonts/DepartureMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <script>(function(){try{var t=localStorage.getItem('theme')}catch(e){}if(t=='night'||t!='day'&&matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('theme-night')})()</script>
@@ -23,18 +33,19 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <canvas id="ocean" aria-hidden="true"></canvas>
   <a class="logo" href="/">{{ config.title }}</a>
+  {%- set path = current_path | default(value="") %}
   <header class="chrome">
     <nav class="nav-inline" aria-label="Main">
-      <a href="/about/">About</a>
-      <a href="/posts/">Posts</a>
-      <a href="/photos/">Photos</a>
+      <a href="/about/"{% if path == "/about/" %} aria-current="page"{% endif %}>About</a>
+      <a href="/posts/"{% if path == "/posts/" %} aria-current="page"{% endif %}>Posts</a>
+      <a href="/photos/"{% if path == "/photos/" %} aria-current="page"{% endif %}>Photos</a>
     </nav>
     <details class="menu">
       <summary>Menu</summary>
       <nav class="menu-panel" aria-label="Main">
-        <a href="/about/">About</a>
-        <a href="/posts/">Posts</a>
-        <a href="/photos/">Photos</a>
+        <a href="/about/"{% if path == "/about/" %} aria-current="page"{% endif %}>About</a>
+        <a href="/posts/"{% if path == "/posts/" %} aria-current="page"{% endif %}>Posts</a>
+        <a href="/photos/"{% if path == "/photos/" %} aria-current="page"{% endif %}>Photos</a>
       </nav>
     </details>
   </header>

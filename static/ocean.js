@@ -73,6 +73,7 @@
 
   function fallback(reason) {
     stopLoop();
+    program = null;
     root.classList.remove('shader-ready');
     root.classList.add('no-webgl');
     if (reason) console.warn('ocean: ' + reason);
@@ -130,6 +131,7 @@
     UNIFORM_NAMES.forEach(function (name) {
       uniforms[name] = gl.getUniformLocation(program, name);
     });
+    uniforms.u_ripples = gl.getUniformLocation(program, 'u_ripples');
     if (uniforms.u_noiseScale) gl.uniform1f(uniforms.u_noiseScale, NOISE_SCALE);
     state.tier = tier.name;
     sizeDirty = true;
@@ -163,6 +165,8 @@
     if (uniforms.u_waveTime) gl.uniform1f(uniforms.u_waveTime, waveTime);
     if (uniforms.u_grainTime) gl.uniform1f(uniforms.u_grainTime, (Math.floor(elapsed * GRAIN_HZ) % GRAIN_STEPS) / GRAIN_HZ);
     if (uniforms.u_night) gl.uniform1f(uniforms.u_night, state.night);
+    if (uniforms.u_ripples && state.ripples) gl.uniform4fv(uniforms.u_ripples, state.ripples);
+    state.wave = waveTime;
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
@@ -227,6 +231,7 @@
 
   function drawStatic() {
     stopLoop();
+    state.ripples = null; // no ripples in the static tier
     draw(performance.now());
     root.classList.add('shader-ready');
   }
@@ -235,6 +240,9 @@
   state.redraw = function () {
     if (isStatic && program && !gl.isContextLost()) drawStatic();
   };
+
+  // site.js writes click ripples: (screen uv xy, state.wave at click, strength) x 10.
+  state.ripples = new Float32Array(40);
 
   function start(sources) {
     if (started) return;
@@ -315,6 +323,16 @@
     root.classList.remove('shader-ready');
   });
   canvas.addEventListener('webglcontextrestored', init);
+
+  // Hidden tab: no frames. On return the gap must not count as a probe frame.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return stopLoop();
+    if (started && program && !isStatic && !rafId && !gl.isContextLost()) {
+      lastFrameTime = 0;
+      if (probe) probe = { frames: 0, deltas: [], stepsDown: probe.stepsDown };
+      rafId = requestAnimationFrame(frame);
+    }
+  });
 
   init();
 })();
