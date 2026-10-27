@@ -120,6 +120,40 @@ simonas-dev/
 - [ ] Fallback to full navigation on any htmx error
 
 ### M6 — Polish (ongoing)
+
+Owner feedback on the M1 ocean (do these first; later M6 items build on them):
+
+> **Parallel lane:** the "Calm sea" and "Composition" items below are being done in a
+> separate worktree/branch `rewrite-sea` (memo `.council/M6a.md`) and will be merged
+> into `rewrite` by the owner's session. **M6 on `rewrite` must skip them** and must not
+> edit `static/shader/ocean.frag.glsl` camera/wave constants or `HORIZON` in `ocean.js`.
+
+Calm sea: it currently reads stormy, moves too aggressively, and has too many
+spiky edges. Target: a calm, slow, glassy swell with soft rounded crests.
+- [ ] Slower motion: lower base wave speed (`u_waveTime` rate, ~0.4–0.5× today),
+      slower camera drift (`CAMERA_DRIFT`) and swell (`CAMERA_SWELL`)
+- [ ] Lower, broader waves: reduce wave height (`WATER_DEPTH` / height scale) and
+      favour low-frequency octaves (faster weight falloff than `w *= 0.82`)
+- [ ] Fewer spikes: reduce drag (`0.38`) and the peakiness of `exp(sin(x)-1)`;
+      fewer `ITERS_NORMAL` and/or fade high-frequency normal detail with distance,
+      so the 0.35–0.4× upscaled render doesn't shimmer
+- [ ] Re-check grain, night mode, content-page throttle (`speed 0.15`), and
+      reduced-motion against the calmer baseline; keep all quality tiers
+- [ ] Acceptance: before/after screenshots and a short capture (desktop + mobile,
+      day + night) recorded in `.council/M6.md`; no visible spiky crests at rest
+
+Composition: golden-ratio split, with the sky taking the larger part.
+- [ ] Horizon at 38.2% from the bottom of the viewport (sky 61.8% on top, sea
+      38.2% below). Today it is ~59% from the bottom (sea is the larger part).
+      With the current formula
+      `horizonFromBottom = 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH)` and
+      `CAMERA_FOCAL = 1.5`, that means `CAMERA_PITCH ≈ -0.156` rad (looking
+      slightly up); retune focal/height if the sea looks too flat
+- [ ] Keep JS and CSS in sync: `HORIZON` in `static/ocean.js` and the
+      `--scene-horizon-from-bottom` fallback in `static/styles.css` (38.2vh/dvh);
+      check anything positioned against the horizon (header scrim, footer fade,
+      sun glow, content surfaces) on desktop and mobile
+
 - [ ] Click ripples: project pointer onto the water plane, push to `u_ripples[10]`
 - [ ] Logo drawn into the shader as a texture so waves pass "through" it
 - [ ] Stars at night (hashed grid), sun/moon glow
@@ -156,6 +190,40 @@ stereo AAC). The master never enters git; add `*.mov` to `.gitignore`.
 - [ ] Pause on `visibilitychange`; video element is removed with the page on
       htmx navigation so it stops decoding
 - [ ] Linked from Photos (and/or Projects/nav — owner decision); excluded from the feed
+
+### M8 — Content edits (½ day)
+
+Owner feedback after reviewing M0–M4. Remove content that doesn't earn its place.
+
+Home hero:
+- [ ] Remove the hero text ("Simonas Sankauskas" heading + "Senior Software Engineer,
+      Android.") from `content/_index.md` / `templates/index.html`; home becomes the
+      ocean + header wordmark + chrome only
+- [ ] Clean up what only existed for the hero text (hero styles, horizon-alignment
+      hook `--scene-horizon-from-bottom` if now unused); keep an accessible page
+      `<h1>` (visually hidden) and the `<title>`/meta description
+
+Remove the Ballistic Wizard post:
+- [ ] Delete `content/posts/ballistic-wizard.md`
+- [ ] Delete its assets if nothing else uses them: `static/images/baller-wizard.jpg`,
+      `static/ballistic-wizard-1.0.0.apk` (still in git history)
+- [ ] Old URLs `/posts/wizard` and `/posts/ballistic-wizard/`: drop the alias and the
+      `vercel.json` redirect; decide 410/404 vs 301 → `/posts/` (default: 301 → `/`
+      so old links land somewhere)
+- [ ] Posts section is now empty: hide "Posts" from nav and decide what `/posts/`
+      does (default: keep the section, render an empty-state line, `noindex`)
+- [ ] `/feed.xml` must stay valid with zero items (existing subscribers keep the URL)
+- [ ] Update README/PLAN references to the post; `zola check` + curl old URLs
+
+Remove the About page:
+- [ ] Delete `content/about.md` ("I am a Senior Software Engineer with 7 years
+      of experience" + GitHub / Instagram / LinkedIn links)
+- [ ] Remove "About" from the header nav and the mobile menu in `templates/base.html`
+- [ ] `/about/` (bookmarks, search results): 301 → `/` in `vercel.json`
+- [ ] Social links are not moved elsewhere unless the owner asks (default: dropped);
+      drop the LinkedIn `[link_checker] skip_prefixes` entry if nothing links there
+- [ ] Nav after M8 = Photos (+ video page from M7); verify header, mobile menu,
+      and footer still balance with fewer items
 
 ## Shader notes
 
