@@ -72,8 +72,8 @@
   --hero-gap: 1rem;
 
   /* Shader horizon (ocean.frag.glsl camera); ocean.js overwrites with canvas px. */
-  --scene-horizon-from-bottom: 59.05vh;
-  --scene-horizon-from-bottom: 59.05dvh;
+  --scene-horizon-from-bottom: 38.2vh;
+  --scene-horizon-from-bottom: 38.2dvh;
 
   --ease: cubic-bezier(0.333333, 0, 0.666667, 1);
   --dur-theme: 900ms;

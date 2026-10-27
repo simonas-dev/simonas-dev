@@ -131,26 +131,26 @@ Owner feedback on the M1 ocean (do these first; later M6 items build on them):
 
 Calm sea: it currently reads stormy, moves too aggressively, and has too many
 spiky edges. Target: a calm, slow, glassy swell with soft rounded crests.
-- [ ] Slower motion: lower base wave speed (`u_waveTime` rate, ~0.4–0.5× today),
+- [x] Slower motion: lower base wave speed (`u_waveTime` rate, ~0.4–0.5× today),
       slower camera drift (`CAMERA_DRIFT`) and swell (`CAMERA_SWELL`)
-- [ ] Lower, broader waves: reduce wave height (`WATER_DEPTH` / height scale) and
+- [x] Lower, broader waves: reduce wave height (`WATER_DEPTH` / height scale) and
       favour low-frequency octaves (faster weight falloff than `w *= 0.82`)
-- [ ] Fewer spikes: reduce drag (`0.38`) and the peakiness of `exp(sin(x)-1)`;
+- [x] Fewer spikes: reduce drag (`0.38`) and the peakiness of `exp(sin(x)-1)`;
       fewer `ITERS_NORMAL` and/or fade high-frequency normal detail with distance,
       so the 0.35–0.4× upscaled render doesn't shimmer
-- [ ] Re-check grain, night mode, content-page throttle (`speed 0.15`), and
+- [x] Re-check grain, night mode, content-page throttle (`speed 0.15`), and
       reduced-motion against the calmer baseline; keep all quality tiers
-- [ ] Acceptance: before/after screenshots and a short capture (desktop + mobile,
+- [x] Acceptance: before/after screenshots and a short capture (desktop + mobile,
       day + night) recorded in `.council/M6.md`; no visible spiky crests at rest
 
 Composition: golden-ratio split, with the sky taking the larger part.
-- [ ] Horizon at 38.2% from the bottom of the viewport (sky 61.8% on top, sea
+- [x] Horizon at 38.2% from the bottom of the viewport (sky 61.8% on top, sea
       38.2% below). Today it is ~59% from the bottom (sea is the larger part).
       With the current formula
       `horizonFromBottom = 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH)` and
       `CAMERA_FOCAL = 1.5`, that means `CAMERA_PITCH ≈ -0.156` rad (looking
       slightly up); retune focal/height if the sea looks too flat
-- [ ] Keep JS and CSS in sync: `HORIZON` in `static/ocean.js` and the
+- [x] Keep JS and CSS in sync: `HORIZON` in `static/ocean.js` and the
       `--scene-horizon-from-bottom` fallback in `static/styles.css` (38.2vh/dvh);
       check anything positioned against the horizon (header scrim, footer fade,
       sun glow, content surfaces) on desktop and mobile
