@@ -130,10 +130,35 @@ h3 {
   font-size: var(--step-1);
 }
 
+/* Rule (AGENTS.md): every hyperlink is underlined at rest, always 1px; hover
+   and current-page states never change or remove it. */
 a {
   color: inherit;
+  text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
+}
+
+/* Hover: a barely-there white wash fades in behind the link. Its box is the
+   padding, cancelled by an equal negative margin, so text and layout don't
+   move (inline links ignore the vertical part; block-level ones need it); clone
+   keeps wrapped lines tidy. Square corners, whole pixels: the aesthetic is
+   pixel/mono. */
+a {
+  --link-pad-x: 10px;
+  --link-pad-y: 5px;
+  padding: var(--link-pad-y) var(--link-pad-x);
+  margin: calc(-1 * var(--link-pad-y)) calc(-1 * var(--link-pad-x)); /* vertical part only matters for block-level links (logo, nav) */
+  border-radius: 0;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-color 240ms var(--ease);
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: rgb(255 255 255 / 0.07);
+  }
 }
 
 #ocean {
@@ -164,12 +189,11 @@ a {
   font-family: var(--font-mono);
   font-size: var(--mono-size);
   line-height: var(--chrome-line);
-  text-decoration: none;
   white-space: nowrap;
-}
-
-.logo:hover {
-  text-decoration: underline;
+  /* Centred by translateX(-50%) of its own (padded) box: the link hover box's
+     symmetric padding already stays centred, a negative side margin would not. */
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .page {
@@ -247,15 +271,6 @@ html.sun-crossfade .page.htmx-added #main > .sky-video {
   font-family: var(--font-mono);
   font-size: var(--mono-size);
   line-height: var(--chrome-line);
-}
-
-header.chrome a {
-  text-decoration: none;
-}
-
-header.chrome a:hover,
-header.chrome a[aria-current="page"] {
-  text-decoration: underline;
 }
 
 header.chrome {
@@ -612,7 +627,7 @@ body:has(.video-page) .logo {
 body:has(.video-page) :is(.logo, .chrome, .video-caption) {
   opacity: 0.55;
   text-shadow: 0 0 0.75rem #000;
-  transition: opacity 220ms var(--ease);
+  transition: opacity 220ms var(--ease), background-color 240ms var(--ease);
 }
 
 body:has(.video-page) :is(.logo, .chrome, .video-caption):is(:hover, :focus-within),
@@ -625,19 +640,21 @@ body:has(.video-page) .chrome:has(details[open]) {
    so the shader horizon is a fixed fraction of this box too: 38.2% from the
    bottom (CAMERA_PITCH in ocean.frag.glsl; change both together). A short
    feather above the line keeps the cut from reading as an edge.
-   A second, round mask keeps only the orb and its glow ring (radius ~0.21 of
-   the video frame's height) and drops the red square frame (~0.40). Sizes
-   follow the frame's on-screen height under object-fit: cover; the orb is
-   centred by --video-shift. */
+   A second, round mask keeps only the orb itself: its disc has a sharp edge at
+   0.175 of the video frame's height, centred 0.06 below the frame's middle
+   (horizontally by --video-shift). Everything outside it (a dark red ring,
+   the black room, the red square frame) is darker than the sky and would show
+   as a black halo, so the mask fades out by 0.18. Sizes follow the frame's
+   on-screen height under object-fit: cover. */
 .sky-video {
   --sky-video-opacity: 0.1;
   --sky-horizon: 38.2%;
   --sky-video-feather: 2%;
   --video-shift: 3%;
   --frame-h: max(100vh, 100vw * 1.06 * 9 / 16); /* 16:9 frame, widened by 2 × shift */
-  --orb-mask: radial-gradient(circle at 50% 50%,
-    #000 calc(var(--frame-h) * 0.22),
-    transparent calc(var(--frame-h) * 0.32));
+  --orb-mask: radial-gradient(circle at 50% calc(50% + var(--frame-h) * 0.06),
+    #000 calc(var(--frame-h) * 0.165),
+    transparent calc(var(--frame-h) * 0.18));
   --horizon-mask: linear-gradient(to top,
     transparent var(--sky-horizon),
     #000 calc(var(--sky-horizon) + var(--sky-video-feather)));
@@ -719,6 +736,7 @@ body:has(.video-page) .chrome:has(details[open]) {
   top: 0.5rem;
   left: 0.5rem;
   z-index: calc(var(--z-chrome) + 1);
+  margin: 0; /* not the link hover box's negative margin */
   padding: 0.5rem 0.75rem;
   background: var(--paper);
   color: var(--ink);
