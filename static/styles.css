@@ -636,10 +636,12 @@ body:has(.video-page) .chrome:has(details[open]) {
 }
 
 /* Digital Sun, faint in the home sky: the whole layer is 10% opaque above the
-   sea line and fully transparent below it. Same box as #ocean (fixed, inset 0),
+   sea line and fades out just below it. Same box as #ocean (fixed, inset 0),
    so the shader horizon is a fixed fraction of this box too: 38.2% from the
-   bottom (CAMERA_PITCH in ocean.frag.glsl; change both together). A short
-   feather above the line keeps the cut from reading as an edge.
+   bottom (CAMERA_PITCH in ocean.frag.glsl; change both together). The water
+   just below that line is flat haze (waves show from ~34.5%), so the sun
+   carries on through it and fades out where the waves begin; cutting it at
+   the line itself leaves a sky-coloured gap above the sea.
    A second, round mask keeps only the orb itself: its disc has a sharp edge at
    0.175 of the video frame's height, centred 0.06 below the frame's middle
    (horizontally by --video-shift). Everything outside it (a dark red ring,
@@ -649,15 +651,15 @@ body:has(.video-page) .chrome:has(details[open]) {
 .sky-video {
   --sky-video-opacity: 0.1;
   --sky-horizon: 38.2%;
-  --sky-video-feather: 2%;
+  --sky-haze: 3.7%; /* misty water below the horizon line, before waves show */
   --video-shift: 3%;
   --frame-h: max(100vh, 100vw * 1.06 * 9 / 16); /* 16:9 frame, widened by 2 × shift */
   --orb-mask: radial-gradient(circle at 50% calc(50% + var(--frame-h) * 0.06),
     #000 calc(var(--frame-h) * 0.165),
     transparent calc(var(--frame-h) * 0.18));
   --horizon-mask: linear-gradient(to top,
-    transparent var(--sky-horizon),
-    #000 calc(var(--sky-horizon) + var(--sky-video-feather)));
+    transparent calc(var(--sky-horizon) - var(--sky-haze)),
+    #000 calc(var(--sky-horizon) - 0.5%));
   position: fixed;
   inset: 0;
   z-index: 0;
