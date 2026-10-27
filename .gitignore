@@ -1,6 +1,8 @@
 # --- Build output -------------------------------------------------------------
 # Zola writes the built site to public/. Source assets live in static/.
 /public/
+# resize_image cache (photos WebP); regenerated on every build.
+/static/processed_images/
 
 # --- Dependencies / tooling caches ------------------------------------------
 node_modules/

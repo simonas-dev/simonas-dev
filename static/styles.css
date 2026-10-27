@@ -45,6 +45,7 @@
   --z-canvas: 0;
   --z-logo: 10;
   --z-page: 100;
+  --z-header-scrim: 150;
   --z-chrome: 200;
 
   --paper: #faf9f6;
@@ -62,6 +63,7 @@
   --mono-size: 0.6875rem;
   --lh: 1.6;
   --measure: 68ch;
+  --measure-wide: 64rem;
 
   --frame-inline: clamp(20px, 5.2083vw, 75px);
   --frame-block: clamp(20px, 5.2083vw, 75px);
@@ -75,6 +77,11 @@
 
   --ease: cubic-bezier(0.333333, 0, 0.666667, 1);
   --dur-theme: 900ms;
+
+  /* Alpha-only grain (dark specks by day, light by night) over a flat colour. */
+  --paper-texture: url("/paper.png");
+  --tint: 97%;
+  --surface-pad: clamp(1.25rem, 4vw, 3.5rem);
 }
 
 html {
@@ -89,6 +96,7 @@ html {
   --paper: #1a1a1a;
   --surface: #2e2d2b;
   --ink: #e8e6e1;
+  --paper-texture: url("/paper-dark.png");
   color-scheme: dark;
 }
 
@@ -101,6 +109,11 @@ body {
   line-height: var(--lh);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Set on <html> by ocean.js when WebGL is unavailable. */
+.no-webgl body {
+  background-image: var(--paper-texture);
 }
 
 h1,
@@ -258,6 +271,34 @@ footer.chrome {
   pointer-events: none;
 }
 
+/* Content pages: paper scrim under the header (like the footer scrim, but
+   opaque behind the text line) so scrolled panel text never shows through the
+   logo and nav. */
+body:has(.content-surface)::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header-scrim);
+  height: calc(var(--frame-block) + var(--chrome-line) + 2rem);
+  background: linear-gradient(to bottom, var(--paper) calc(var(--frame-block) + var(--chrome-line)), transparent);
+  pointer-events: none;
+}
+
+body:has(.content-surface) footer.chrome {
+  background: linear-gradient(to top, var(--paper) calc(var(--frame-block) + var(--chrome-line)), transparent);
+}
+
+/* Keep focused/skip-link targets clear of the opaque header and footer scrims. */
+html {
+  scroll-padding-block: calc(var(--frame-block) + var(--chrome-line) + 2rem);
+}
+
+body:has(.content-surface) .logo {
+  z-index: calc(var(--z-header-scrim) + 1);
+}
+
 footer.chrome > * {
   pointer-events: auto;
 }
@@ -314,8 +355,7 @@ footer.chrome small {
     align-items: flex-start;
     gap: 0.75rem;
     padding: calc(var(--frame-block) + var(--chrome-line) + 1rem) var(--frame-inline) 4rem;
-    /* --paper-texture: paper.png hook (M4). */
-    background: var(--paper) var(--paper-texture, none);
+    background: var(--paper) var(--paper-texture);
     -webkit-mask-image: linear-gradient(#000 calc(100% - 3rem), transparent);
     mask-image: linear-gradient(#000 calc(100% - 3rem), transparent);
     font-size: calc(var(--mono-size) * 2);
@@ -340,6 +380,134 @@ footer.chrome small {
 img {
   max-width: 100%;
   height: auto;
+}
+
+/* Content pages: paper panel; the ocean behind it is slowed by site.js. */
+.content-surface {
+  box-sizing: content-box;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding: var(--surface-pad);
+  background-color: color-mix(in srgb, var(--surface) var(--tint), transparent);
+  background-image: var(--paper-texture);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  overflow-wrap: break-word;
+}
+
+.content-surface.wide {
+  max-width: var(--measure-wide);
+}
+
+.content-surface > :first-child,
+.content-surface > header > :first-child {
+  margin-top: 0;
+}
+
+.content-surface > :last-child {
+  margin-bottom: 0;
+}
+
+.content-surface h1 {
+  margin: 0 0 0.75em;
+}
+
+.content-surface h2 {
+  margin: 2em 0 0.5em;
+}
+
+.content-surface h3 {
+  margin: 1.75em 0 0.5em;
+}
+
+.content-surface p,
+.content-surface ul,
+.content-surface ol,
+.content-surface blockquote,
+.content-surface pre {
+  margin: 0 0 1.25em;
+}
+
+.content-surface ul,
+.content-surface ol {
+  padding-left: 1.25em;
+}
+
+.content-surface li + li {
+  margin-top: 0.25em;
+}
+
+.content-surface blockquote {
+  margin-inline: 0;
+  padding-left: 1em;
+  border-left: 1px solid currentColor;
+  font-style: italic;
+}
+
+.content-surface hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.content-surface code,
+.content-surface pre,
+.content-surface time,
+.content-surface .meta {
+  font-family: var(--font-mono);
+  font-size: var(--mono-size);
+}
+
+.content-surface pre {
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.content-surface .meta {
+  opacity: 0.8;
+}
+
+.content-surface > header {
+  margin-bottom: 2em;
+}
+
+.content-surface > header h1 {
+  margin-bottom: 0.25em;
+}
+
+.content-surface > header .meta {
+  margin: 0;
+}
+
+.content-surface .post-list {
+  padding: 0;
+  list-style: none;
+}
+
+.post-list li + li {
+  margin-top: 1.5em;
+}
+
+.post-list a {
+  font-size: var(--step-1);
+}
+
+.post-list .meta {
+  margin: 0.25em 0 0;
+}
+
+/* Photos reach the panel's inline edges (not the viewport). */
+.content-surface .bleed {
+  margin: 0 calc(-1 * var(--surface-pad)) var(--surface-pad);
+}
+
+.content-surface .bleed:last-child {
+  margin-bottom: 0;
+}
+
+.bleed img {
+  display: block;
+  width: 100%;
 }
 
 :focus-visible {

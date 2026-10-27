@@ -24,3 +24,4 @@ Advisors treat entries here as the contract. Newest last.
 | 2026-10-27 | M2 | ocean.js budget | Stays < 10,240 B; horizon setter paid for by trimming comments | autopilot (perf+skeptic) |
 | 2026-10-27 | M3 | Night shader look | Darken night sky/scene in shader so `#e8e6e1` ink is readable (deviates from PLAN night formula) | autopilot (council rec) |
 | 2026-10-27 | M3 | Theme mechanics | Key `theme` in localStorage (absent = auto = OS); inline head script + `site.js` (tween) + ocean.js; meta color-scheme stays `light` | autopilot (council) |
+| 2026-10-27 | M4 | Content surfaces & throttle | Alpha-grain paper PNGs under 97% tint; photos on `.wide` surface bleeding to panel edges; throttle policy in site.js, generic res/fps knobs in ocean.js (probe exempt), budget unchanged; first photo eager | autopilot (council) |

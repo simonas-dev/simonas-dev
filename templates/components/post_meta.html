@@ -1,0 +1,4 @@
+{# Mono metadata line: date · reading time (at least 1 min). #}
+{% component post_meta(date, reading_time) %}
+<p class="meta"><time datetime="{{ date | date(format="%Y-%m-%d") }}">{{ date | date(format="%Y-%m-%d") }}</time> · {% if reading_time < 1 %}1{% else %}{{ reading_time }}{% endif %} min read</p>
+{% endcomponent post_meta %}

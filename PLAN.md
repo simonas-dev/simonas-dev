@@ -107,11 +107,11 @@ simonas-dev/
 - [x] Animate `u_night` 0↔1 in the render loop over the same duration
 
 ### M4 — Content pages (1 day)
-- [ ] `.content-surface` panel: paper texture under a 97% tint, slight blur backdrop, max-width ~68ch
-- [ ] Prose styles: serif body, mono for code/metadata, generous line-height (1.6)
-- [ ] Post list + post template with date, reading time, feed at `/feed.xml`
-- [ ] Photos page: full-bleed images on the paper surface, lazy-loaded, WebP + fallback
-- [ ] When a content page is visible: shader drops to 15 fps, 0.5× resolution, wave speed ×0.15
+- [x] `.content-surface` panel: paper texture under a 97% tint, slight blur backdrop, max-width ~68ch
+- [x] Prose styles: serif body, mono for code/metadata, generous line-height (1.6)
+- [x] Post list + post template with date, reading time, feed at `/feed.xml`
+- [x] Photos page: full-bleed images on the paper surface, lazy-loaded, WebP + fallback
+- [x] When a content page is visible: shader drops to 15 fps, 0.5× resolution, wave speed ×0.15
 
 ### M5 — htmx navigation (½ day)
 - [ ] `hx-boost="true" hx-select="div.page" hx-target="div.page" hx-swap="outerHTML swap:220ms"`
@@ -127,6 +127,35 @@ simonas-dev/
 - [ ] Pause rendering when tab is hidden (`visibilitychange`)
 - [ ] OG image, favicons (light + dark), 404 page
 - [ ] Lighthouse pass; target < 150 KB JS total
+
+### M7 — Video page (½ day)
+
+A dedicated full-screen page for the "Timeline 1" clip (glowing orb in a square
+frame, dark, slow). Not on the home page. No user controls.
+
+Source master: `/Users/simonas/Timeline 1.mov` (4K24 HEVC Main10, 45 s, 33 MB,
+stereo AAC). The master never enters git; add `*.mov` to `.gitignore`.
+
+- [ ] Encode with ffmpeg into `static/video/`: drop audio; pick a 10–20 s span and
+      crossfade end→start into a seamless loop; light encode-time grain to mask
+      banding in dark gradients; `+faststart`
+- [ ] Variants: AV1 10-bit (primary) + H.264 (fallback); 1920×1080 landscape and a
+      portrait crop centred on the orb (~1080×1350) via `<source media>`; target
+      ≤ 2 MB per file
+- [ ] Poster frame as AVIF + WebP (~30 KB), shown instantly and as the fallback
+- [ ] Page `content/<slug>.md` (default slug `digital-sun`, title TBD) + `templates/video.html`:
+      `<video autoplay muted loop playsinline disablepictureinpicture
+      disableremoteplayback aria-hidden="true">`, no `controls`, `object-fit: cover`
+      full viewport on black
+- [ ] Hide the iOS Low Power Mode start-playback overlay; poster stays instead
+- [ ] Chrome dims (low opacity, full on hover/focus); optional small mono caption
+      (title / year / place) matching photo captions
+- [ ] Ocean shader pauses while this page is shown; resumes on navigation away
+      (works with htmx `div.page` swaps)
+- [ ] `prefers-reduced-motion`, Save-Data / slow connection: poster only, no autoplay
+- [ ] Pause on `visibilitychange`; video element is removed with the page on
+      htmx navigation so it stops decoding
+- [ ] Linked from Photos (and/or Projects/nav — owner decision); excluded from the feed
 
 ## Shader notes
 

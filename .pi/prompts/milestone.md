@@ -1,6 +1,6 @@
 ---
 description: Take one PLAN.md milestone through council → approval → worker/review loop → close
-argument-hint: "<M0..M6> [--autopilot] [--advisors name,name,name] [--max-passes 2|3] [--max-rounds N]"
+argument-hint: "<M0..M7> [--autopilot] [--advisors name,name,name] [--max-passes 2|3] [--max-rounds N]"
 ---
 
 Drive exactly one milestone of PLAN.md to done. You, the parent session, are the
@@ -19,6 +19,7 @@ Defaults: `--max-passes 2`, `--max-rounds 3`, advisors from the table below.
 | M4 Content pages | council-designer, council-perf, council-architect |
 | M5 htmx navigation | council-architect, council-perf, council-skeptic |
 | M6 Polish | council-designer, council-perf, council-skeptic |
+| M7 Video page | council-designer, council-perf, council-skeptic |
 
 Never use more than 3 advisors (the council protocol caps at 4).
 

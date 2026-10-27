@@ -1,5 +1,5 @@
-// Ocean background: WebGL setup, quality tiers, render loop. `shader-ready`
-// on <html> fades the canvas in once a tier settles; else `no-webgl`.
+// Ocean background: WebGL, quality tiers, render loop. Sets `shader-ready`
+// (tier settled) or `no-webgl` on <html>.
 (function () {
   'use strict';
   if (window.__ocean) return;
@@ -14,13 +14,13 @@
     { name: 'low', scale: 0.35, raymarch: 8, normal: 10 }
   ];
   var MAX_BACKING_WIDTH = 1024;
-  var NOISE_SCALE = 1.0; // grain cell ≈ one backing pixel
+  var NOISE_SCALE = 1.0;
   var GRAIN_HZ = 24;
   var MAX_DT = 0.1;
   var PROBE_WARMUP_FRAMES = 10;
   var PROBE_FRAMES = 30;
   var PROBE_SLOW_MS = 20;
-  var PROBE_STATIC_MS = 40; // > 33.3: 30 Hz-capped browsers keep animating
+  var PROBE_STATIC_MS = 40; // > 33.3: 30 Hz caps still animate
   var PROBE_BAIL_FRAMES = 10;
   var PROBE_BAIL_MS = 100;
   var GRAIN_STEPS = 16; // grain is fract(.. + u_grainTime * 1.5)
@@ -28,16 +28,16 @@
   var TIER_STORAGE_KEY = 'ocean-tier';
   var STATIC_TIER = 'static';
   var UNIFORM_NAMES = ['iResolution', 'iTime', 'u_waveTime', 'u_grainTime', 'u_night', 'u_noiseScale'];
-  // Horizon height / canvas height: 0.5 + 0.5 * CAMERA_FOCAL * tan(CAMERA_PITCH), see ocean.frag.glsl.
+  // Horizon / canvas height, from the ocean.frag.glsl camera.
   var HORIZON = 0.5 + 0.75 * Math.tan(0.12);
 
-  // site.js tweens `night`; seeded from the head script's class.
-  var state = window.__ocean = { speed: 1, night: +root.classList.contains('theme-night'), tier: null };
+  // site.js sets speed/res/fps and tweens night.
+  var state = window.__ocean = { speed: 1, res: 1, fps: 0, resize: onResize, night: +root.classList.contains('theme-night'), tier: null };
 
   var gl = null;
   var program = null;
   var quadBuffer = null;
-  var started = false; // per context
+  var started = false;
   var uniforms = {};
   var sourcesPromise = null;
   var sourcesCache = null;
@@ -56,7 +56,7 @@
   }
 
   function writeCachedTier(value) {
-    try { sessionStorage.setItem(TIER_STORAGE_KEY, value); } catch (e) { /* storage unavailable */ }
+    try { sessionStorage.setItem(TIER_STORAGE_KEY, value); } catch (e) {}
   }
 
   function initialTierIndex() {
@@ -137,7 +137,7 @@
   }
 
   function applySize() {
-    var scale = TIERS[tierIndex].scale;
+    var scale = TIERS[tierIndex].scale * (probe ? 1 : state.res);
     var w = Math.max(1, Math.round(canvas.clientWidth * scale));
     var h = Math.max(1, Math.round(canvas.clientHeight * scale));
     if (w > MAX_BACKING_WIDTH) {
@@ -201,6 +201,7 @@
     }
     if (ms > PROBE_STATIC_MS && tierIndex === TIERS.length - 1) return settleStatic();
     probe = null;
+    sizeDirty = true;
     writeCachedTier(TIERS[tierIndex].name);
     revealPending = true;
     return false;
@@ -208,15 +209,18 @@
 
   function frame(now) {
     rafId = 0;
-    var delta = lastFrameTime ? now - lastFrameTime : 0;
-    draw(now);
-    if (revealPending) {
-      revealPending = false;
-      root.classList.add('shader-ready');
-    }
-    if (probe && stepProbe(delta)) {
-      if (isStatic) drawStatic();
-      return;
+    // -8 ms: 60 Hz gives 15 fps, not 12. Probe uncapped.
+    if (probe || !state.fps || now - lastFrameTime > 1000 / state.fps - 8) {
+      var delta = lastFrameTime ? now - lastFrameTime : 0;
+      draw(now);
+      if (revealPending) {
+        revealPending = false;
+        root.classList.add('shader-ready');
+      }
+      if (probe && stepProbe(delta)) {
+        if (isStatic) drawStatic();
+        return;
+      }
     }
     rafId = requestAnimationFrame(frame);
   }
@@ -227,7 +231,7 @@
     root.classList.add('shader-ready');
   }
 
-  // Static tier has no loop; site.js calls this per tween tick.
+  // Static tier has no loop; site.js redraws per tween tick.
   state.redraw = function () {
     if (isStatic && program && !gl.isContextLost()) drawStatic();
   };
@@ -262,7 +266,7 @@
       drawStatic();
       return;
     }
-    // Cached tier was already probed; reveal after the first frame.
+    // Cached tier: no probe, reveal on first frame.
     probe = cachedIndex >= 0 ? null : { frames: 0, deltas: [], stepsDown: 0 };
     revealPending = !probe;
     stopLoop();

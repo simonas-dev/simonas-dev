@@ -4,7 +4,7 @@ date = 2024-06-27
 aliases = ["/posts/wizard"]
 +++
 
-![baller wizard using the app](/images/baller-wizard.jpg)
+<img src="/images/baller-wizard.jpg" alt="baller wizard using the app" width="1024" height="1024" fetchpriority="high">
 
 A quick and dirty solution to sending numeric data to 
 ESP32 using Android app via Bluetooth.

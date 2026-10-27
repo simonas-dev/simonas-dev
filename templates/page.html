@@ -3,5 +3,7 @@
 {% block title %}{{ page.title }} — {{ config.title }}{% endblock title %}
 
 {% block content %}
-{{ page.content | safe }}
+<article class="content-surface{% if page.extra.wide %} wide{% endif %}">
+  {{ page.content | safe }}
+</article>
 {% endblock content %}

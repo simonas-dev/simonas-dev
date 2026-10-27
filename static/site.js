@@ -1,6 +1,7 @@
 // Theme toggle: auto (follow OS) → night → day. Stored as localStorage
 // `theme` = 'night' | 'day' (absent = auto); the inline head script applies it
 // before first paint. Here: clicks, OS changes in auto, and the u_night tween.
+// Also sets the ocean's content-page mode (oceanMode).
 (function () {
   'use strict';
   var STORAGE_KEY = 'theme';
@@ -85,5 +86,18 @@
     applyTheme();
   });
 
+  // Content pages calm the ocean behind the panel: slow waves, half resolution,
+  // 15 fps. Re-callable when the page content changes.
+  function oceanMode() {
+    var ocean = window.__ocean;
+    if (!ocean) return;
+    var content = !!document.querySelector('.content-surface');
+    ocean.speed = content ? 0.15 : 1;
+    ocean.res = content ? 0.5 : 1;
+    ocean.fps = content ? 15 : 0;
+    ocean.resize();
+  }
+
   renderToggles();
+  oceanMode();
 })();
