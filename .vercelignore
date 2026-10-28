@@ -8,3 +8,5 @@ node_modules
 *.mkv
 PLAN.md
 AGENTS.md
+tools/
+worklog

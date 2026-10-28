@@ -1,0 +1,21 @@
+#!/bin/bash
+# After the current autopilot exits, run remaining milestones in order, each in a fresh session.
+# Stops on: missing commit for the previous milestone, a 'Blocked' section, or a failed run.
+cd /Users/simonas/Projects/simonas-dev
+log() { echo "[$(date +%T)] $*" >> .pi/runs/queue.log; }
+while kill -0 "$(cat .pi/runs/autopilot.pid)" 2>/dev/null; do sleep 30; done
+prev=M6
+for m in M8 M7; do
+  if ! git log --format=%s | grep -q "^$prev:"; then log "STOP: no '$prev:' commit; not starting $m"; exit 1; fi
+  if grep -qs "^## Blocked" .council/$prev.md; then log "STOP: $prev is Blocked"; exit 1; fi
+  if [ -n "$(git status --porcelain)" ]; then log "note: dirty tree before $m: $(git status --porcelain | tr '\n' ' ')"; fi
+  log "starting $m"
+  pi -a --mode json "/milestone $m --autopilot
+
+QUEUE NOTE: run ONLY $m, then stop (do not continue to other milestones). Earlier milestones are committed; read .council/decisions.md (owner entries are binding).
+HEADLESS NOTE: you are running non-interactively in json mode; the process exits when you finish your final reply. Do not end your turn while subagent runs are in flight: run workflows/workers/reviewers in the foreground or call bg_wait until they finish. If you hit a STOP condition from the Autopilot rules, write the question to .council/$m.md under '## Blocked' and end." > .pi/runs/$m.jsonl 2> .pi/runs/$m.err &
+  echo $! > .pi/runs/autopilot.pid
+  wait $!; log "$m exited ($?)"
+  prev=$m
+done
+log "queue done"
