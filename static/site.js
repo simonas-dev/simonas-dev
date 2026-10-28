@@ -43,6 +43,13 @@
     if (event.persisted) videoMode();
   });
 
+  // Safety net (iOS swipe-back, throttled frames): once the page has settled,
+  // make sure the current page's video is the one asked to play.
+  function retryVideo() {
+    var current = document.querySelector('.video-page video, .sky-video video');
+    if (current && (current !== video || current.paused)) videoMode();
+  }
+
   // Content pages calm the ocean behind the panel: slow waves, half resolution,
   // 15 fps. Reduced motion slows the waves further. The Digital Sun page covers
   // the ocean, so it stops rendering there. Re-callable when the page content
@@ -155,6 +162,9 @@
   }, true);
 
   document.addEventListener('visibilitychange', videoMode);
+  // Last resort: a tap is a user gesture, which lets iOS start any video.
+  document.addEventListener('touchend', retryVideo, { passive: true });
+  window.addEventListener('popstate', function () { setTimeout(retryVideo, 2000); });
 
   if (reduceQuery) {
     var onMotionChange = function () { oceanMode(false); videoMode(); };
@@ -290,7 +300,10 @@
     root.classList.toggle('sun-crossfade', on);
     if (on) {
       var ms = parseFloat(getComputedStyle(root).getPropertyValue('--sun-crossfade')) || 1400;
-      crossfadeTimer = setTimeout(function () { root.classList.remove('sun-crossfade'); }, ms + 300);
+      crossfadeTimer = setTimeout(function () {
+        root.classList.remove('sun-crossfade');
+        videoMode(); // iOS may defer play() on the page painted only as a transition snapshot
+      }, ms + 300);
     }
     return on;
   }

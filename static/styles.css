@@ -568,8 +568,12 @@ img {
   visibility: hidden;
 }
 
-.video-ok .sky-video:not(.video-failed) picture {
-  display: none;
+/* The faint home sun keeps its poster until the video really plays (the
+   colour step is invisible at 10%): if iOS defers play() (e.g. after the
+   back crossfade) the sun stays, at worst still, instead of vanishing. */
+.video-ok .sky-video:has(video.playing):not(.video-failed) picture {
+  visibility: hidden;
+  transition: visibility 0s 900ms; /* hide once the video has faded in */
 }
 
 /* Except while crossfading in from home: the incoming page must show the sun
@@ -581,7 +585,9 @@ html.sun-crossfade.video-ok .video-page .video-poster,
 }
 
 .video-page video {
-  opacity: 0;
+  /* Not 0: iOS won't start a muted video that isn't visible, and this one
+     only becomes opaque once it plays. 0.001 is invisible but counts. */
+  opacity: 0.001;
   transition: opacity 900ms var(--ease);
 }
 
@@ -701,7 +707,7 @@ body:has(.video-page) .chrome:has(details[open]) {
 }
 
 .sky-video video {
-  opacity: 0;
+  opacity: 0.001; /* not 0, see .video-page video */
   transition: opacity 900ms var(--ease);
 }
 
