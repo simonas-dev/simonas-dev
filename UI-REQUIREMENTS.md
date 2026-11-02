@@ -39,8 +39,9 @@ Every hyperlink (`<a href>`) is underlined at rest, not only on hover or focus.
 - The underline weight is fixed at **1px**. Hover, focus, visited and
   current-page (`aria-current`) states must not change its thickness, offset or
   colour, or remove it. Hover feedback is the faint background wash.
-- Show the current page with a different cue (a marker glyph, wash or
-  weight), never by removing the underline.
+- No extra current-page marker (glyph, wash or weight). In the header, the
+  current page is shown only by its centre position (UI-3). Never mark it by
+  removing the underline.
 - Never put `text-decoration: none` on an `<a>`. The base rule lives on `a` in
   `static/styles.css`.
 - Buttons and `<summary>` are not links and are not underlined. They still need
@@ -97,7 +98,9 @@ Rules:
   (`section.subsections`, `section.pages`, `page.ancestors`/`section.ancestors`).
   Adding a page to a folder adds it to that folder's right region and gives it
   the folder as its left region. Only direct children are listed, never
-  grandchildren.
+  grandchildren. A page or section opts out of its parent's right region
+  with `[extra] nav = false` in its front matter (e.g. `/posts/`). The
+  page itself still has the normal header.
 
 Check: for the root, a section and a leaf page, the header matches the worked
 example pattern (left = parent, centre = self, right = direct children). At

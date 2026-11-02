@@ -188,15 +188,6 @@
     ocean.ripples.set([(2 * x - rect.width) / rect.height, (rect.height - 2 * y) / rect.height, ocean.wave || 0, 1], i);
   });
 
-  // aria-current on the nav links (header sits outside the swapped div.page).
-  function markCurrentNav() {
-    var links = document.querySelectorAll('header.chrome nav a');
-    for (var i = 0; i < links.length; i++) {
-      if (links[i].pathname === location.pathname) links[i].setAttribute('aria-current', 'page');
-      else links[i].removeAttribute('aria-current');
-    }
-  }
-
   // htmx boosted navigation (attributes on <body>, history element div.page).
   // Anything htmx can't swap cleanly becomes a full page load.
   // One navigation at a time: htmx picks the swap target (div.page) at request
@@ -227,18 +218,11 @@
     else fullNav(next.url.href);
   }
 
-  function closeMenu() {
-    var menu = document.querySelector('.menu');
-    if (menu) menu.open = false;
-  }
-
   function afterPageChange() {
     lastPath = location.pathname;
     oceanMode(true);
     videoMode();
     scheduleSunWarm();
-    markCurrentNav();
-    closeMenu();
   }
 
   document.addEventListener('htmx:beforeRequest', function (event) {
@@ -263,7 +247,6 @@
       return;
     }
     navXhr = event.detail.xhr;
-    closeMenu();
   });
 
   // Back/forward while a navigation is pending: htmx restores the entry (only

@@ -40,20 +40,61 @@
 <body hx-boost="true" hx-select="div.page" hx-target="div.page" hx-swap="outerHTML swap:220ms show:window:top">
   <a class="skip-link" href="#main">Skip to content</a>
   <canvas id="ocean" aria-hidden="true"></canvas>
-  <a class="logo" href="/" aria-label="{{ config.title }} — home">~/</a>
-  {%- set path = current_path | default(value="") %}
-  <header class="chrome">
-    <nav class="nav-inline" aria-label="Main">
-      <a href="/digital-sun/"{% if path == "/digital-sun/" %} aria-current="page"{% endif %}>Digital Sun</a>
-    </nav>
-    <details class="menu">
-      <summary>Menu</summary>
-      <nav class="menu-panel" aria-label="Main">
-        <a href="/digital-sun/"{% if path == "/digital-sun/" %} aria-current="page"{% endif %}>Digital Sun</a>
-      </nav>
-    </details>
-  </header>
+  {#- UI-3 folder header: parent · current · direct children, derived from the
+      content tree. The root's name is `~/` and it has no parent. Pages with
+      neither `page` nor `section` (404) sit at root level: parent `~/`, no
+      children. Inside div.page so htmx swaps and history snapshots carry it. -#}
+  {%- set chrome_ancestors = [] %}
+  {%- set chrome_subsections = [] %}
+  {%- set chrome_pages = [] %}
+  {%- if page %}
+    {%- set chrome_current_title = page.title %}
+    {%- set chrome_current_path = page.path %}
+    {%- set chrome_ancestors = page.ancestors %}
+  {%- elif section %}
+    {%- if section.path == "/" %}{% set chrome_current_title = "~/" %}{% else %}{% set chrome_current_title = section.title %}{% endif %}
+    {%- set chrome_current_path = section.path %}
+    {%- set chrome_ancestors = section.ancestors %}
+    {%- set chrome_subsections = section.subsections %}
+    {%- set chrome_pages = section.pages %}
+  {%- else %}
+    {%- set chrome_current_path = current_path | default(value="/404.html") %}
+  {%- endif %}
+  {%- set chrome_parent_path = "/" %}
+  {%- set chrome_parent_title = "~/" %}
+  {%- if chrome_ancestors | length > 0 %}
+    {%- set chrome_parent = get_section(path=chrome_ancestors | last, metadata_only=true) %}
+    {%- set chrome_parent_path = chrome_parent.path %}
+    {%- if chrome_parent.path != "/" %}{% set chrome_parent_title = chrome_parent.title %}{% endif %}
+  {%- elif section %}
+    {%- set chrome_parent_path = "" %}
+  {%- endif %}
+  {#- Children opt out of the right region with `[extra] nav = false`. #}
+  {%- set chrome_children_n = 0 %}
+  {%- set chrome_children_ch = 0 %}
+  {%- for subsection_path in chrome_subsections %}{% set subsection = get_section(path=subsection_path, metadata_only=true) %}{% if subsection.extra.nav is not defined or subsection.extra.nav %}{% set_global chrome_children_n = chrome_children_n + 1 %}{% set_global chrome_children_ch = chrome_children_ch + (subsection.title | length) %}{% endif %}{% endfor %}
+  {%- for child in chrome_pages %}{% if child.extra.nav is not defined or child.extra.nav %}{% set_global chrome_children_n = chrome_children_n + 1 %}{% set_global chrome_children_ch = chrome_children_ch + (child.title | length) %}{% endif %}{% endfor %}
   <div class="page" hx-history-elt>
+    <header class="chrome">
+      <nav class="chrome-tree" aria-label="Main">
+        {%- if chrome_parent_path %}
+        <a class="chrome-parent" href="{{ chrome_parent_path }}" style="view-transition-name: nav{{ chrome_parent_path | replace(from="/", to="-") | replace(from=".", to="-") }}">{{ chrome_parent_title }}</a>
+        {%- endif %}
+        <a class="chrome-current" href="{{ chrome_current_path }}" aria-current="page" style="view-transition-name: nav{{ chrome_current_path | replace(from="/", to="-") | replace(from=".", to="-") }}">{% if chrome_current_title is defined %}{{ chrome_current_title }}{% else %}{% block chrome_current_title %}{% endblock chrome_current_title %}{% endif %}</a>
+        {%- if chrome_children_n > 0 %}
+        {#- --children-ch/-n size the one-line row (monospace: 1ch per character) so
+            the list switches to one item per line when the row doesn't fit. #}
+        <ul class="chrome-children" style="--children-ch: {{ chrome_children_ch }}; --children-n: {{ chrome_children_n }}">
+          {%- for subsection_path in chrome_subsections %}{% set child = get_section(path=subsection_path, metadata_only=true) %}{% if child.extra.nav is not defined or child.extra.nav %}
+          <li><a href="{{ child.path }}" style="view-transition-name: nav{{ child.path | replace(from="/", to="-") | replace(from=".", to="-") }}">{{ child.title }}</a></li>
+          {%- endif %}{% endfor %}
+          {%- for child in chrome_pages %}{% if child.extra.nav is not defined or child.extra.nav %}
+          <li><a href="{{ child.path }}" style="view-transition-name: nav{{ child.path | replace(from="/", to="-") | replace(from=".", to="-") }}">{{ child.title }}</a></li>
+          {%- endif %}{% endfor %}
+        </ul>
+        {%- endif %}
+      </nav>
+    </header>
     <main id="main" tabindex="-1">
       {% block content %}{% endblock content %}
     </main>
