@@ -113,6 +113,43 @@
     if (playing && playing.catch) playing.catch(function () { posterFallback(true); /* blocked: show the poster */ });
   }
 
+  // The <source> the browser would pick now: first whose media matches and
+  // whose type plays (the resource selection algorithm, minus network errors).
+  var probeVideo = null;
+  function pickSource(sources) {
+    probeVideo = probeVideo || document.createElement('video');
+    for (var i = 0; i < sources.length; i++) {
+      var media = sources[i].getAttribute('media');
+      if (media && !matchMedia(media).matches) continue;
+      if (!probeVideo.canPlayType(sources[i].getAttribute('type') || '')) continue;
+      return sources[i];
+    }
+    return null;
+  }
+
+  // <source media> is evaluated only when a video loads (unlike <picture> and
+  // CSS @media), so a rotation or resize across a breakpoint would keep the
+  // old encode under the new framing. Reload the video when its pick changes,
+  // keeping the loop position.
+  function refreshVideoSource() {
+    if (!video || !video.isConnected || !video.currentSrc) return; // not loaded yet: play() picks fresh
+    var pick = pickSource(video.querySelectorAll('source'));
+    if (!pick || pick.src === video.currentSrc) return;
+    var t = video.currentTime;
+    pauseVideo();
+    video.load();
+    video.addEventListener('loadedmetadata', function () {
+      try { video.currentTime = t % (video.duration || Infinity); } catch (e) {}
+    }, { once: true });
+    videoMode();
+  }
+
+  var sourceTimer = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(sourceTimer);
+    sourceTimer = setTimeout(refreshVideoSource, 300);
+  });
+
   // Warm the HTTP cache with the file the Digital Sun page will play, so the
   // link opens straight into the loop. Picks like the browser does: the first
   // <source> in #sun-sources (home only) whose media matches and type plays.
@@ -123,19 +160,14 @@
   function warmSunVideo() {
     var list = document.getElementById('sun-sources');
     if (sunWarmed || !list || !window.fetch || document.hidden || !videoAllowed()) return;
-    var probe = document.createElement('video');
-    var sources = list.content.querySelectorAll('source');
-    for (var i = 0; i < sources.length; i++) {
-      var media = sources[i].getAttribute('media');
-      if (media && !matchMedia(media).matches) continue;
-      if (!probe.canPlayType(sources[i].getAttribute('type') || '')) continue;
+    var source = pickSource(list.content.querySelectorAll('source'));
+    if (source) {
       sunWarmed = true;
-      fetch(sources[i].src, { priority: 'low', credentials: 'same-origin' }).then(function (response) {
+      fetch(source.src, { priority: 'low', credentials: 'same-origin' }).then(function (response) {
         if (!response.ok || !response.body) return;
         var reader = response.body.getReader();
         (function drain() { reader.read().then(function (r) { if (!r.done) drain(); }, function () {}); })();
       }, function () { sunWarmed = false; });
-      return;
     }
   }
 
