@@ -13,6 +13,10 @@ This repo is being rewritten from a Nextra blog into a static Zola site.
 
 ## Design rules (owner, binding)
 
+Full ruleset with IDs and checks: `UI-REQUIREMENTS.md` (UI-1 44px touch
+targets, UI-2 links underlined, UI-3 folder-style
+header: parent · current · children, no menus). Follow it for every template/CSS change.
+
 - **All hyperlinks are underlined at rest**, not only on hover or focus. This
   includes the logo, nav and menu links, footer links and links in content.
   The underline weight is fixed (1px): hover, focus and current-page states
