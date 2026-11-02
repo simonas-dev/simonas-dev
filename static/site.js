@@ -281,6 +281,9 @@
     var on = !!document.startViewTransition && (lastPath === SUN_PATH) !== (toPath === SUN_PATH);
     clearTimeout(crossfadeTimer);
     root.classList.toggle('sun-crossfade', on);
+    // Arrived on Digital Sun by the crossfade: keep its poster until the video
+    // plays (Safari starts it only after the transition), see styles.css.
+    root.classList.toggle('sun-arrived', on && toPath === SUN_PATH);
     if (on) {
       var ms = parseFloat(getComputedStyle(root).getPropertyValue('--sun-crossfade')) || 1400;
       crossfadeTimer = setTimeout(function () {

@@ -631,6 +631,19 @@ html.sun-crossfade.video-ok .video-page .video-poster,
   visibility: visible;
 }
 
+/* ...and after it: if the browser defers play() until the transition is over
+   (Safari), hiding the poster at its end would dip to black and fade the
+   video back in. Keep it until the video plays, then fade the video in over
+   it and drop it once opaque. */
+html.sun-arrived.video-ok .video-page .video-poster {
+  visibility: visible;
+}
+
+html.sun-arrived.video-ok .video-page:has(video.playing):not(.video-failed) .video-poster {
+  visibility: hidden;
+  transition: visibility 0s 900ms;
+}
+
 .video-page video {
   /* Not 0: iOS won't start a muted video that isn't visible, and this one
      only becomes opaque once it plays. 0.001 is invisible but counts. */

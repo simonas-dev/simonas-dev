@@ -285,6 +285,9 @@
     gl = canvas.getContext('webgl', {
       antialias: false,
       alpha: false,
+      // Safari snapshots the canvas for the home <-> Digital Sun view transition
+      // after the buffer is cleared, so without this the crossfade starts from black.
+      preserveDrawingBuffer: true,
       depth: false,
       powerPreference: 'low-power'
     });
