@@ -247,6 +247,9 @@
       return;
     }
     navXhr = event.detail.xhr;
+    // Freeze at request time, so the canvas is painted a frame or more before
+    // the crossfade snapshots the page (made at swap time, it can miss one).
+    if (document.startViewTransition && (location.pathname === SUN_PATH) !== (url.pathname === SUN_PATH)) freezeSunFrame();
   });
 
   // Back/forward while a navigation is pending: htmx restores the entry (only
@@ -277,8 +280,92 @@
   var lastPath = location.pathname;
   // The class comes off once the crossfade has finished.
   var crossfadeTimer = 0;
+  // Starting a crossfade: Safari's view-transition snapshot drops <video>
+  // layers (and, for a frame, the masked home sky layer as a whole), so the sun
+  // was replaced by its (different) poster on Digital Sun, or vanished from the
+  // home sky. Paint what is on screen onto a plain canvas instead, which Safari
+  // snapshots reliably. It goes with the old page.
+  function drawCover(ctx, v, r) { // object-fit: cover of v into rect r
+    var scale = Math.max(r.width / v.videoWidth, r.height / v.videoHeight);
+    var sw = r.width / scale, sh = r.height / scale;
+    ctx.drawImage(v, (v.videoWidth - sw) / 2, (v.videoHeight - sh) / 2, sw, sh, r.left, r.top, r.width, r.height);
+  }
+
+  function freezeSunFrame() {
+    if (document.querySelector('.video-freeze')) return;
+    var v = document.querySelector('.video-page video, .sky-video video');
+    if (!v || !v.classList.contains('playing') || v.readyState < 2 || !v.videoWidth) return;
+    var layer = v.parentNode; // fixed, inset 0
+    var box = layer.getBoundingClientRect();
+    var r = v.getBoundingClientRect();
+    var rect = { left: r.left - box.left, top: r.top - box.top, width: r.width, height: r.height };
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var c = document.createElement('canvas');
+    c.className = 'video-freeze';
+    c.setAttribute('aria-hidden', 'true');
+    c.width = Math.round(box.width * dpr);
+    c.height = Math.round(box.height * dpr);
+    var ctx = c.getContext('2d');
+    ctx.scale(dpr, dpr);
+    var sky = layer.classList.contains('sky-video');
+    try {
+      drawCover(ctx, v, rect);
+      if (sky) bakeSkyLayer(ctx, layer, v, rect, box.width, box.height);
+    } catch (e) { return; }
+    c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none';
+    if (sky) {
+      // Outside the masked, translucent layer (all of it is baked in), which
+      // is hidden meanwhile so the sun isn't drawn twice.
+      c.style.zIndex = '0';
+      layer.insertAdjacentElement('afterend', c);
+      root.classList.add('sky-frozen');
+    } else {
+      v.insertAdjacentElement('afterend', c);
+    }
+  }
+
+  // The home sky layer's CSS (styles.css, .sky-video): opacity and the two
+  // intersected masks, the horizon fade and the round orb. --frame-h is the
+  // video frame's on-screen height under object-fit: cover.
+  function bakeSkyLayer(ctx, layer, v, rect, w, h) {
+    var cs = getComputedStyle(layer);
+    var horizon = parseFloat(cs.getPropertyValue('--sky-horizon')) / 100;
+    var haze = parseFloat(cs.getPropertyValue('--sky-haze')) / 100;
+    var frameH = v.videoHeight * Math.max(rect.width / v.videoWidth, rect.height / v.videoHeight);
+    ctx.globalCompositeOperation = 'destination-in';
+    var line = ctx.createLinearGradient(0, h, 0, 0); // to top
+    line.addColorStop(horizon - haze, 'rgba(0,0,0,0)');
+    line.addColorStop(horizon - 0.005, 'rgba(0,0,0,1)');
+    ctx.fillStyle = line;
+    ctx.fillRect(0, 0, w, h);
+    var cx = w / 2, cy = h / 2 + frameH * 0.06;
+    var orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, frameH * 0.18);
+    orb.addColorStop(0, 'rgba(0,0,0,1)');
+    orb.addColorStop(0.165 / 0.18, 'rgba(0,0,0,1)');
+    orb.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = orb;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(0,0,0,' + parseFloat(cs.opacity) + ')';
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // Safari can snapshot the page in the very frame the canvas was added, before
+  // it is drawn (the poster then flashes for a frame): swap a few frames later.
+  var FREEZE_LEAD_MS = 50;
+  function freezeLead() {
+    return document.querySelector('.video-freeze') ? 'swap:' + FREEZE_LEAD_MS + 'ms ' : '';
+  }
+
+  function unfreezeSunFrame() {
+    var c = document.querySelector('.video-freeze');
+    if (c) c.parentNode.removeChild(c);
+    root.classList.remove('sky-frozen');
+  }
+
   function sunCrossfade(toPath) {
     var on = !!document.startViewTransition && (lastPath === SUN_PATH) !== (toPath === SUN_PATH);
+    if (on) freezeSunFrame();
     clearTimeout(crossfadeTimer);
     root.classList.toggle('sun-crossfade', on);
     // Arrived on Digital Sun by the crossfade: keep its poster until the video
@@ -295,7 +382,10 @@
   }
 
   document.addEventListener('htmx:historyCacheHit', function (event) {
-    if (sunCrossfade(location.pathname)) event.detail.swapSpec.transition = true;
+    if (sunCrossfade(location.pathname)) {
+      event.detail.swapSpec.transition = true;
+      if (document.querySelector('.video-freeze')) event.detail.swapSpec.swapDelay = FREEZE_LEAD_MS;
+    }
   });
 
   document.addEventListener('htmx:beforeSwap', function (event) {
@@ -303,7 +393,10 @@
     if (detail.shouldSwap && detail.xhr !== droppedXhr) {
       var to = new URL(detail.xhr.responseURL || detail.pathInfo.requestPath, location.href).pathname;
       // No swap delay: the old page must still be fully visible when it's snapshotted.
-      if (sunCrossfade(to)) detail.swapOverride = 'outerHTML transition:true show:window:top';
+      // No swap delay (the old page must still be fully visible when it's
+      // snapshotted; the swap fade is off during the crossfade), except a few
+      // frames for a just-made frozen sun frame to reach the screen first.
+      if (sunCrossfade(to)) detail.swapOverride = 'outerHTML ' + freezeLead() + 'transition:true show:window:top';
     }
     if (detail.xhr === droppedXhr) {
       detail.shouldSwap = false;
@@ -324,11 +417,23 @@
 
   // Snapshots (link navs and back/forward) must not keep .playing: a restored
   // copy would show the empty video over its poster until it plays.
-  document.addEventListener('htmx:beforeHistorySave', pauseVideo);
+  // The frozen frame stays out of the snapshot: taken out while htmx copies the
+  // page, put back before the next frame.
+  document.addEventListener('htmx:beforeHistorySave', function () {
+    pauseVideo();
+    var c = document.querySelector('.video-freeze');
+    if (!c) return;
+    var parent = c.parentNode, next = c.nextSibling;
+    parent.removeChild(c);
+    Promise.resolve().then(function () { if (parent.isConnected) parent.insertBefore(c, next); });
+  });
 
   // A response that won't swap (and isn't an error, which full-loads) ends the navigation.
   document.addEventListener('htmx:afterRequest', function (event) {
-    if (event.detail.xhr === navXhr && !navSwapPending) navXhr = null;
+    if (event.detail.xhr === navXhr && !navSwapPending) {
+      navXhr = null;
+      unfreezeSunFrame(); // still on this page: let the video show again
+    }
   });
 
   ['htmx:responseError', 'htmx:sendError', 'htmx:targetError', 'htmx:timeout', 'htmx:onLoadError'].forEach(function (name) {
@@ -348,6 +453,7 @@
   // browser may never compute it before htmx drops the class at settle, and the
   // content pops in without the fade.
   document.addEventListener('htmx:afterSwap', function (event) {
+    root.classList.remove('sky-frozen'); // the frozen sky left with the old page
     releaseDetachedVideo();
     var content = event.detail.boosted && document.querySelector('#main > *');
     if (content) void getComputedStyle(content).opacity;

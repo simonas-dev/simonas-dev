@@ -740,6 +740,13 @@ body:has(.video-page) header.chrome:is(:hover, :focus-within) a {
   mask-composite: intersect;
 }
 
+/* A crossfade is starting: a frozen, pre-composited copy of this layer stands
+   in for it (site.js freezeSunFrame), since Safari drops the masked layer from
+   the transition's first frame. */
+html.sky-frozen .sky-video {
+  visibility: hidden;
+}
+
 /* Matches the portrait encodes' breakpoint in index.html. */
 @media (orientation: portrait) {
   .sky-video {
