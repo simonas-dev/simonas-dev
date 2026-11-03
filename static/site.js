@@ -190,7 +190,9 @@
 
   // Media events don't bubble; capture them. The video fades in over the poster.
   document.addEventListener('playing', function (event) {
-    if (event.target === video) video.classList.add('playing');
+    if (event.target !== video) return;
+    video.classList.add('playing');
+    posterFallback(false); // e.g. started by a tap after Low Power Mode blocked autoplay
   }, true);
 
   document.addEventListener('visibilitychange', videoMode);
